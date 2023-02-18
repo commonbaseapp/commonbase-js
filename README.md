@@ -23,5 +23,5 @@ const result = await client.generate("my_commonbase_project_id", {
   meetingNotes: "...",
 });
 
-console.log(result.firstResult);
+console.log(result.bestResult);
 ```
