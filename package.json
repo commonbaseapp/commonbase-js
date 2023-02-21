@@ -1,5 +1,5 @@
 {
-  "name": "@commonbase/core",
+  "name": "@commonbase/sdk",
   "version": "0.0.1",
   "description": "Commonbase is a Typescript SDK for building LLM integrations and tooling",
   "repository": {
@@ -9,7 +9,7 @@
   "keywords": [
     "commonbase",
     "sdk",
-    "chat-gpt",
+    "cms",
     "gpt-3",
     "gpt3",
     "openai"

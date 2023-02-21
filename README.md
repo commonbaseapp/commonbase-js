@@ -1,17 +1,17 @@
 # Commonbase Typescript SDK for building LLM integrations faster and easier
 
-The Commonbase Javascript SDK allows developers to integrate with any popular LLM API provider without needing to change any code. The SDK helps with collecting data and feedback from the users and helps you fine-tune models for your specific use case.
+Commonbase allows developers to integrate with any popular LLM API provider without needing to change any code. The SDK helps with collecting data and feedback from the users and helps you fine-tune models for your specific use case.
 
 ## Installation
 
 ```bash
-$ npm install commonbase
+$ npm install @commonbase/sdk
 ```
 
 ## Usage
 
 ```javascript
-import { createClient } from "commonbase";
+import { createClient } from "@commonbase/sdk";
 
 const client = createClient();
 
