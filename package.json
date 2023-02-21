@@ -20,7 +20,8 @@
   "publishConfig": {
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
-    "directory": "dist"
+    "directory": "dist",
+    "access": "public"
   },
   "scripts": {
     "build": "tsc && cp package.json README.md ./dist/",
