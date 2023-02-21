@@ -1,5 +1,5 @@
 {
-  "name": "commonbase",
+  "name": "@commonbase/core",
   "version": "0.0.1",
   "description": "Commonbase is a Typescript SDK for building LLM integrations and tooling",
   "repository": {
@@ -42,5 +42,5 @@
     "typescript": "^4.9.5"
   },
   "public": true,
-  "packageManager": "pnpm@7.25.0"
+  "packageManager": "pnpm@7.27.0"
 }
