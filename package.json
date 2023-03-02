@@ -16,7 +16,8 @@
   ],
   "author": "Commonbase Inc.",
   "license": "MIT",
-  "main": "./index.ts",
+  "main": "./index.js",
+  "types": "./types.d.ts",
   "publishConfig": {
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
