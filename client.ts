@@ -1,23 +1,37 @@
 import { rootApiUrl } from "./constants";
-import { Client, ClientOptions, GenerationResults } from "./types";
+import { ClientOptions, CompletionResults } from "./types";
 
-export function createClient(options?: ClientOptions): Client {
-  async function generate(
-    projectId: string,
-    parameters: Record<string, string>,
-  ): Promise<GenerationResults> {
-    const res = await fetch(`${rootApiUrl}/api/project/${projectId}`, {
+export class Client {
+  private options: ClientOptions;
+  constructor(options?: ClientOptions) {
+    this.options = options || {};
+  }
+  private async fetchAPI(path: string, body: any): Promise<any> {
+    const res = await fetch(`${rootApiUrl}/${path}`, {
       method: "POST",
-      body: JSON.stringify(parameters),
+      body: JSON.stringify({
+        projectId: this.options.projectId,
+        userId: this.options.userId,
+        ...body,
+      }),
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${options && options.apiKey}`,
+        "Content-Type": "application/json; charset=utf-8",
       },
     });
-    const body = await res.json();
-    return body;
+    return res.json();
   }
-  return {
-    generate,
-  };
+  async createCompletion(
+    variables: Record<string, string>,
+  ): Promise<CompletionResults> {
+    const completionsRes = await this.fetchAPI("completions", {
+      variables,
+    });
+    if (!completionsRes.ok) {
+      throw new Error(completionsRes.error);
+    }
+    return {
+      bestResult: completionsRes.choices[0].text,
+      choices: completionsRes.choices.map((c: any) => c.text),
+    };
+  }
 }
