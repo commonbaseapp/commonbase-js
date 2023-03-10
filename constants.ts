@@ -1,1 +1,1 @@
-export const rootApiUrl = "https://commonbase.app";
+export const rootApiUrl = "https://api.commonbase.com";
