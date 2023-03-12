@@ -26,9 +26,11 @@ export class Client {
   }
   async createCompletion(
     variables: Record<string, string>,
+    userId?: string,
   ): Promise<CompletionResults> {
     const completionsRes = await this.fetchAPI("completions", {
       variables,
+      userId,
     });
     if (!completionsRes.ok) {
       throw new Error(`api error: ${completionsRes.error}`);
