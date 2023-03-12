@@ -6,7 +6,7 @@ export class Client {
   constructor(options?: ClientOptions) {
     this.options = options || {};
   }
-  private async fetchAPI(path: string, body: any): Promise<any> {
+  private async fetchAPI(path: string, body: object): Promise<any> {
     const res = await fetch(`${rootApiUrl}/${path}`, {
       method: "POST",
       body: JSON.stringify({
@@ -18,7 +18,11 @@ export class Client {
         "Content-Type": "application/json; charset=utf-8",
       },
     });
-    return res.json();
+    const resBody = await res.json();
+    if (!res.ok) {
+      throw new Error(`api error (status=${res.status}): ${resBody.error}`);
+    }
+    return resBody;
   }
   async createCompletion(
     variables: Record<string, string>,
@@ -27,7 +31,10 @@ export class Client {
       variables,
     });
     if (!completionsRes.ok) {
-      throw new Error(completionsRes.error);
+      throw new Error(`api error: ${completionsRes.error}`);
+    }
+    if (completionsRes.choices?.length === 0) {
+      throw new Error("no completions found");
     }
     return {
       bestResult: completionsRes.choices[0].text,

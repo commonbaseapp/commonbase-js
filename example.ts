@@ -5,7 +5,7 @@ async function main() {
     projectId: "xxx",
   });
   const completionResult = await client.createCompletion({
-    user_name: "Groot",
+    user_name: "Alice",
     project_name: "my-galaxy",
   });
   console.log(completionResult.bestResult);
