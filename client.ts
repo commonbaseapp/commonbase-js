@@ -11,7 +11,7 @@ export class Client {
       method: "POST",
       body: JSON.stringify({
         projectId: this.options.projectId,
-        userId: this.options.userId,
+        apiKey: this.options.apiKey,
         ...body,
       }),
       headers: {
@@ -29,13 +29,16 @@ export class Client {
     userId?: string,
   ): Promise<CompletionResults> {
     const completionsRes = await this.fetchAPI("completions", {
-      variables,
+      variables: {
+        ...this.options.defaultVariables,
+        ...variables,
+      },
       userId,
     });
     if (!completionsRes.ok) {
       throw new Error(`api error: ${completionsRes.error}`);
     }
-    if (completionsRes.choices?.length === 0) {
+    if (!completionsRes.choices || completionsRes.choices.length === 0) {
       throw new Error("no completions found");
     }
     return {
