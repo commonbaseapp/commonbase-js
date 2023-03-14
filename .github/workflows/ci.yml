@@ -15,30 +15,9 @@ jobs:
         node-version: [16.x, 18.x]
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - uses: ./.github/actions/pnpm
         with:
           node-version: ${{ matrix.node-version }}
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
-        id: pnpm-install
-        with:
-          version: 7
-          run_install: false
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: pnpm install
       - name: Test
         run: pnpm test
       - name: Build
@@ -48,23 +27,15 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v3
+      - uses: ./.github/actions/pnpm
+        with:
+          node-version: 18.x
       - uses: go-semantic-release/action@v1
         id: semrel
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           update-file: package.json
           allow-initial-development-versions: true
-      - uses: actions/setup-node@v3
-        if: steps.semrel.outputs.version != ''
-        with:
-          node-version: 18.x
-          registry-url: 'https://registry.npmjs.org'
-      - uses: pnpm/action-setup@v2
-        if: steps.semrel.outputs.version != ''
-        with:
-          run_install: true
-        env:
-          NPM_TOKEN: xxx
       - run: pnpm publish --no-git-checks
         if: steps.semrel.outputs.version != ''
         env:
