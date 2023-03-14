@@ -1,17 +1,18 @@
-name: Node.js CI
-
+name: CI
 on:
   push:
-    branches: [main]
+    branches:
+      - '**'
   pull_request:
-    branches: [main]
+    branches:
+      - '**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [16.x, 18.x]
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
@@ -42,3 +43,29 @@ jobs:
         run: pnpm test
       - name: Build
         run: pnpm build
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - uses: go-semantic-release/action@v1
+        id: semrel
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          update-file: package.json
+          allow-initial-development-versions: true
+      - uses: actions/setup-node@v3
+        if: steps.semrel.outputs.version != ''
+        with:
+          node-version: 18.x
+          registry-url: 'https://registry.npmjs.org'
+      - uses: pnpm/action-setup@v2
+        if: steps.semrel.outputs.version != ''
+        with:
+          run_install: true
+        env:
+          NPM_TOKEN: xxx
+      - run: pnpm publish --no-git-checks
+        if: steps.semrel.outputs.version != ''
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,6 +1,6 @@
 {
   "name": "@commonbase/sdk",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Commonbase is a Typescript SDK for building LLM integrations and tooling",
   "repository": {
     "type": "git",
@@ -18,18 +18,16 @@
   "license": "MIT",
   "main": "./index.js",
   "publishConfig": {
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
     "directory": "dist",
     "access": "public"
   },
   "scripts": {
     "build": "tsc && cp package.json README.md ./dist/",
-    "test": "echo 'tests passed!'",
-    "release": "pnpm build && pnpm lint:fix && pnpm format && pnpm publish",
+    "test": "pnpm lint",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix --ext .tsx,.ts,.json",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepublish": "pnpm build"
   },
   "devDependencies": {
     "@types/node": "^18.14.0",
@@ -43,6 +41,5 @@
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
   },
-  "public": true,
   "packageManager": "pnpm@7.27.0"
 }
