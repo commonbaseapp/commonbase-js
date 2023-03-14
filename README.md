@@ -11,17 +11,16 @@ $ npm install @commonbase/sdk
 ## Usage
 
 ```javascript
-import { createClient } from "@commonbase/sdk";
+import { Client } from "@commonbase/sdk";
 
-const client = createClient();
-
-// get a project id by creating a project on https://commonbase.app/login
-const result = await client.generate("my_commonbase_project_id", {
-  useFormalStyle: true,
-  recipientName: "Vincent Vega",
-  senderName: "Jules Winnfield",
-  meetingNotes: "...",
+const client = new Client({
+  projectId: "xxx-xxx-xxx-xxx-xxx",
 });
 
-console.log(result.bestResult);
+const completionResult = await client.createCompletion({
+  user_name: "Alice",
+  project_name: "my-galaxy",
+});
+
+console.log(completionResult.bestResult);
 ```
