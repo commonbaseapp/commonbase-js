@@ -6,5 +6,5 @@ export type CompletionResults = {
 export type ClientOptions = {
   projectId?: string;
   apiKey?: string;
-  userId?: string;
+  defaultVariables?: Record<string, string>;
 };
