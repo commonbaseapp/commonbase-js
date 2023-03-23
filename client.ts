@@ -6,11 +6,15 @@ export class Client {
   constructor(options?: ClientOptions) {
     this.options = options || {};
   }
-  private async fetchAPI(path: string, body: object): Promise<any> {
+  private async fetchAPI(
+    path: string,
+    body: object,
+    projectId?: string,
+  ): Promise<any> {
     const res = await fetch(`${rootApiUrl}/${path}`, {
       method: "POST",
       body: JSON.stringify({
-        projectId: this.options.projectId,
+        projectId: projectId || this.options.projectId,
         apiKey: this.options.apiKey,
         ...body,
       }),
@@ -27,14 +31,19 @@ export class Client {
   async createCompletion(
     variables: Record<string, string>,
     userId?: string,
+    projectId?: string,
   ): Promise<CompletionResults> {
-    const completionsRes = await this.fetchAPI("completions", {
-      variables: {
-        ...this.options.defaultVariables,
-        ...variables,
+    const completionsRes = await this.fetchAPI(
+      "completions",
+      {
+        variables: {
+          ...this.options.defaultVariables,
+          ...variables,
+        },
+        userId,
       },
-      userId,
-    });
+      projectId,
+    );
     if (!completionsRes.ok) {
       throw new Error(`api error: ${completionsRes.error}`);
     }
@@ -43,7 +52,8 @@ export class Client {
     }
     return {
       bestResult: completionsRes.choices[0].text,
-      choices: completionsRes.choices.map((c: any) => c.text),
+      choices: completionsRes.choices.map((c: { text: string }) => c.text),
+      _raw: completionsRes,
     };
   }
 }
