@@ -1,6 +1,7 @@
 export type CompletionResults = {
   bestResult: string;
   choices: string[];
+  _raw: unknown;
 };
 
 export type ClientOptions = {
