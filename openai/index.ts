@@ -94,13 +94,17 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
     createCompletionRequest: CreateCompletionRequest,
     options?: AxiosRequestConfig,
   ) {
+    const projectId =
+      createCompletionRequest.projectId ||
+      (typeof createCompletionRequest.prompt === "string"
+        ? createCompletionRequest.prompt
+        : undefined);
+    // TODO: validate projectId, if not valid call the openai api directly
+
     const res = await this.cbClient.createCompletion(
       createCompletionRequest.variables || {},
       createCompletionRequest.user,
-      createCompletionRequest.projectId ||
-        (typeof createCompletionRequest.prompt === "string"
-          ? createCompletionRequest.prompt
-          : undefined),
+      projectId,
     );
     return {
       data: res._raw,

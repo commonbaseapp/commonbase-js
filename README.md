@@ -24,3 +24,27 @@ const completionResult = await client.createCompletion({
 
 console.log(completionResult.bestResult);
 ```
+
+### Drop-in replacement for OpenAI API
+
+```javascript
+import { Configuration, OpenAIApi } from "@commonbase/sdk/openai";
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+const completion = await openai.createCompletion({
+  // the model will be ignored and the configured model from the project will be used
+  model: "text-davinci-003",
+  // prompt: "Hello World!", // prompt is not needed anymore
+  // set this to you project id
+  projectId: "xxx-xxx-xxx-xxx-xxx",
+  // configure the prompt variables
+  variables: {
+    user: "Alice",
+  },
+});
+console.log(completion.data.choices[0].text);
+```
