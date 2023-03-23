@@ -10,7 +10,7 @@ $ npm install @commonbase/sdk
 
 ## Usage
 
-```javascript
+```typescript
 import { Client } from "@commonbase/sdk";
 
 const client = new Client({
@@ -27,7 +27,9 @@ console.log(completionResult.bestResult);
 
 ### Drop-in replacement for OpenAI API
 
-```javascript
+```typescript
+// the openai package can be replaced with the @commonbase/sdk/openai package
+// import { Configuration, OpenAIApi } from "openai";
 import { Configuration, OpenAIApi } from "@commonbase/sdk/openai";
 
 const configuration = new Configuration({
