@@ -1,3 +1,4 @@
+import * as assert from "assert";
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import * as originalOpenAI from "openai";
 
@@ -69,6 +70,12 @@ interface CreateCompletionRequest
   projectId?: string;
 }
 
+interface CreatChatCompletionRequest
+  extends originalOpenAI.CreateChatCompletionRequest {
+  variables?: Record<string, string>;
+  projectId?: string;
+}
+
 export class OpenAIApi extends originalOpenAI.OpenAIApi {
   private cbClient: Client;
   constructor(
@@ -83,11 +90,39 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
   }
 
   public async createChatCompletion(
-    createChatCompletionRequest: originalOpenAI.CreateChatCompletionRequest,
+    createChatCompletionRequest: CreatChatCompletionRequest,
     options?: AxiosRequestConfig,
   ) {
-    // TODO: implement
-    return super.createChatCompletion(createChatCompletionRequest, options);
+    // return super.createChatCompletion(createChatCompletionRequest, options);
+    const res = await this.cbClient.createCompletion(
+      createChatCompletionRequest.variables || {},
+      createChatCompletionRequest.user,
+      {
+        messages: createChatCompletionRequest.messages,
+      },
+      createChatCompletionRequest.projectId,
+    );
+    assert.ok(res._raw.ok);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    res._raw.choices = res._raw.choices.map((choice: any) => {
+      // transform text response to messages response
+      choice.message = {
+        content: choice.text,
+        role: choice.role || "assistant",
+      };
+      delete choice.text;
+      delete choice.role;
+      return choice;
+    });
+
+    return {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data: res._raw as any,
+      status: 200,
+      headers: {},
+      config: options,
+    } as AxiosResponse<originalOpenAI.CreateChatCompletionResponse>;
   }
 
   public async createCompletion(
@@ -99,15 +134,15 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
       (typeof createCompletionRequest.prompt === "string"
         ? createCompletionRequest.prompt
         : undefined);
-    // TODO: validate projectId, if not valid call the openai api directly
 
     const res = await this.cbClient.createCompletion(
       createCompletionRequest.variables || {},
       createCompletionRequest.user,
+      undefined,
       projectId,
     );
     return {
-      data: res._raw,
+      data: res._raw as any,
       status: 200,
       headers: {},
       config: options,
