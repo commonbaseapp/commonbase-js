@@ -1,5 +1,10 @@
 import { rootApiUrl } from "./constants";
-import { ClientOptions, CompletionResults } from "./types";
+import {
+  APIResponse,
+  ChatContext,
+  ClientOptions,
+  CompletionResults,
+} from "./types";
 
 export class Client {
   private options: ClientOptions;
@@ -10,7 +15,7 @@ export class Client {
     path: string,
     body: object,
     projectId?: string,
-  ): Promise<any> {
+  ): Promise<APIResponse> {
     const res = await fetch(`${rootApiUrl}/${path}`, {
       method: "POST",
       body: JSON.stringify({
@@ -31,6 +36,7 @@ export class Client {
   async createCompletion(
     variables: Record<string, string>,
     userId?: string,
+    chatContext?: ChatContext,
     projectId?: string,
   ): Promise<CompletionResults> {
     const completionsRes = await this.fetchAPI(
@@ -40,6 +46,7 @@ export class Client {
           ...this.options.defaultVariables,
           ...variables,
         },
+        context: chatContext,
         userId,
       },
       projectId,
@@ -52,7 +59,7 @@ export class Client {
     }
     return {
       bestResult: completionsRes.choices[0].text,
-      choices: completionsRes.choices.map((c: { text: string }) => c.text),
+      choices: completionsRes.choices.map((c) => c.text),
       _raw: completionsRes,
     };
   }
