@@ -142,6 +142,7 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
       projectId,
     );
     return {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: res._raw as any,
       status: 200,
       headers: {},
