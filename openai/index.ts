@@ -4,65 +4,8 @@ import * as originalOpenAI from "openai";
 
 import { Client } from "../client";
 
-export {
-  ChatCompletionRequestMessage,
-  ChatCompletionRequestMessageRoleEnum,
-  ChatCompletionResponseMessage,
-  ChatCompletionResponseMessageRoleEnum,
-  Configuration,
-  ConfigurationParameters,
-  CreateAnswerRequest,
-  CreateAnswerResponse,
-  CreateAnswerResponseSelectedDocumentsInner,
-  CreateChatCompletionRequest,
-  CreateChatCompletionResponse,
-  CreateChatCompletionResponseChoicesInner,
-  CreateClassificationRequest,
-  CreateClassificationResponse,
-  CreateClassificationResponseSelectedExamplesInner,
-  CreateCompletionRequest,
-  CreateCompletionResponse,
-  CreateCompletionResponseChoicesInner,
-  CreateCompletionResponseChoicesInnerLogprobs,
-  CreateCompletionResponseUsage,
-  CreateEditRequest,
-  CreateEditResponse,
-  CreateEmbeddingRequest,
-  CreateEmbeddingResponse,
-  CreateEmbeddingResponseDataInner,
-  CreateEmbeddingResponseUsage,
-  CreateFineTuneRequest,
-  CreateImageRequest,
-  CreateImageRequestResponseFormatEnum,
-  CreateImageRequestSizeEnum,
-  CreateModerationRequest,
-  CreateModerationResponse,
-  CreateModerationResponseResultsInner,
-  CreateModerationResponseResultsInnerCategories,
-  CreateModerationResponseResultsInnerCategoryScores,
-  CreateSearchRequest,
-  CreateSearchResponse,
-  CreateSearchResponseDataInner,
-  CreateTranscriptionResponse,
-  CreateTranslationResponse,
-  DeleteFileResponse,
-  DeleteModelResponse,
-  Engine,
-  FineTune,
-  FineTuneEvent,
-  ImagesResponse,
-  ImagesResponseDataInner,
-  ListEnginesResponse,
-  ListFilesResponse,
-  ListFineTuneEventsResponse,
-  ListFineTunesResponse,
-  ListModelsResponse,
-  Model,
-  OpenAIApiAxiosParamCreator,
-  OpenAIApiFactory,
-  OpenAIApiFp,
-  OpenAIFile,
-} from "openai";
+// export all types from the openai package
+export * from "openai";
 
 interface CreateCompletionRequest
   extends originalOpenAI.CreateCompletionRequest {
@@ -76,6 +19,7 @@ interface CreatChatCompletionRequest
   projectId?: string;
 }
 
+// override the OpenAIApi class to use the commonbase client
 export class OpenAIApi extends originalOpenAI.OpenAIApi {
   private cbClient: Client;
   constructor(
