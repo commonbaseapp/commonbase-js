@@ -1,8 +1,10 @@
+import process from "process";
+
 import { Client } from "./index";
 
 async function main() {
   const client = new Client({
-    projectId: "xxx",
+    projectId: process.env.CB_PROJECT_ID,
   });
   const completionResult = await client.createCompletion({
     user_name: "Alice",
