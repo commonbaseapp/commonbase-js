@@ -46,7 +46,7 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
       },
       createChatCompletionRequest.projectId,
     );
-    assert.ok(res._raw.ok);
+    assert.ok(res._raw.completed);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     res._raw.choices = res._raw.choices.map((choice: any) => {

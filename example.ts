@@ -6,11 +6,19 @@ async function main() {
   const client = new Client({
     projectId: process.env.CB_PROJECT_ID,
   });
-  const completionResult = await client.createCompletion({
-    user_name: "Alice",
-    project_name: "my-galaxy",
+  const completionStream = await client.createStreamingCompletion({
+    user: "Alice",
   });
-  console.log(completionResult.bestResult);
+  for await (const completionResult of completionStream) {
+    if (completionResult.completed) {
+      process.stdout.write("\n\n");
+      console.log("streamCompleted", completionResult);
+      continue;
+    }
+    process.stdout.write(completionResult.choices[0].text);
+  }
+
+  console.log("done");
 }
 
 main().catch(console.error);

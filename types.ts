@@ -27,16 +27,12 @@ type APIResponseChoice = {
   logprobs?: number;
 };
 
-export type APIResponse =
-  | {
-      ok: true;
-      invocationId: string;
-      projectId: string;
-      type: string;
-      model: string;
-      choices: APIResponseChoice[];
-    }
-  | {
-      ok: false | undefined;
-      error: string;
-    };
+export type APIResponse = {
+  error: undefined;
+  completed: boolean;
+  invocationId: string;
+  projectId: string;
+  type: string;
+  model: string;
+  choices: APIResponseChoice[];
+};
