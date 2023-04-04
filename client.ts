@@ -109,10 +109,6 @@ export class Client {
       projectId,
     )) as APIResponse;
 
-    if (completionsRes.error) {
-      throw new Error(`api error: ${completionsRes.error}`);
-    }
-
     if (!completionsRes.choices || completionsRes.choices.length === 0) {
       throw new Error("no completions found");
     }

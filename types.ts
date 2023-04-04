@@ -28,7 +28,6 @@ type APIResponseChoice = {
 };
 
 export type APIResponse = {
-  error: undefined;
   completed: boolean;
   invocationId: string;
   projectId: string;
