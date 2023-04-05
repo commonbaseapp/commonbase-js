@@ -8,6 +8,14 @@ body,
   margin: 0;
 }
 
+::-webkit-scrollbar-track {
+  background: red;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
 html,
 body,
 textarea,
@@ -20,9 +28,8 @@ button {
 }
 
 .chat-layout {
-  max-width: 600px;
-  margin: 0 auto;
   padding: 10px;
+  max-height: 100vh;
   box-sizing: border-box;
 
   display: flex;
@@ -30,6 +37,17 @@ button {
   justify-content: space-between;
 
   gap: 15px;
+}
+
+.feed-wrap {
+  overflow-y: auto;
+}
+
+.feed,
+form {
+  margin: 0 auto;
+  max-width: 600px;
+  width: 100%;
 }
 
 .feed {
@@ -49,6 +67,23 @@ button {
 
 .message:nth-child(even) {
   background: #563af2;
+}
+
+.message .chunk {
+  display: inline-block;
+  white-space: pre-wrap;
+  animation: appear 200ms ease-in-out;
+}
+
+@keyframes appear {
+  from {
+    transform: translateY(-5px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0px);
+    opacity: 1;
+  }
 }
 
 form {
@@ -73,7 +108,4 @@ textarea {
   width: 100%;
   box-sizing: border-box;
   resize: none;
-}
-
-button {
 }

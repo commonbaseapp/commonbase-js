@@ -1,12 +1,34 @@
 import "./Chat.css";
 
-import {
-  ChatClient,
-  StreamingChatResponse,
-  StreamingText,
-} from "@commonbase/sdk";
+import { ChatClient, StreamingChatResponse } from "@commonbase/sdk";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
+
+function StreamingMessage({ response }: { response: StreamingChatResponse }) {
+  const [chunks, setChunks] = useState<string[]>([]);
+
+  useEffect(
+    () =>
+      response?.on("chunk", () => {
+        setChunks(response.chunks.slice());
+      }),
+    [response],
+  );
+
+  if (chunks.length == 0) {
+    return null;
+  }
+
+  return (
+    <div className="message">
+      {chunks.map((chunk, i) => (
+        <span key={i} className="chunk">
+          {chunk}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export function Chat() {
   const [chatClient] = useState(
@@ -40,20 +62,21 @@ export function Chat() {
 
   return (
     <div className="chat-layout">
-      <div className="feed">
-        {history.map((content, i) => (
-          <div key={i} className="message">
-            {content}
-          </div>
-        ))}
-        {response && (
-          <div className="message">
-            <StreamingText response={response} />
-          </div>
-        )}
+      <div className="feed-wrap">
+        <div className="feed">
+          {history.map((content, i) => (
+            <div key={i} className="message">
+              {content}
+            </div>
+          ))}
+          {response && <StreamingMessage response={response} />}
+        </div>
       </div>
       <form onSubmit={handleSubmit}>
         <textarea
+          placeholder={
+            response ? "Waiting for response..." : "Type a message..."
+          }
           disabled={!!response}
           value={inputValue}
           onChange={(event) => {
