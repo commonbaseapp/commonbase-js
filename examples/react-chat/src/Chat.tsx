@@ -32,11 +32,7 @@ function StreamingMessage({ response }: { response: StreamingChatResponse }) {
 
 export function Chat() {
   const [chatClient] = useState(
-    () =>
-      new ChatClient({
-        // projectId: "xxx-xxx-xxx-xxx-xxx",
-        projectId: "d6af1d48-dead-49e8-aa37-cab03f0106c6",
-      }),
+    () => new ChatClient({ projectId: "xxx-xxx-xxx-xxx-xxx" }),
   );
 
   const [inputValue, setInputValue] = useState("");
