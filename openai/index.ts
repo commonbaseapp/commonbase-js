@@ -1,4 +1,3 @@
-import * as assert from "assert";
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import * as originalOpenAI from "openai";
 
@@ -46,7 +45,6 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
       },
       createChatCompletionRequest.projectId,
     );
-    assert.ok(res._raw.ok);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     res._raw.choices = res._raw.choices.map((choice: any) => {
