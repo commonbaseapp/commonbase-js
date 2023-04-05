@@ -2,18 +2,25 @@
 
 html,
 body,
+#root,
+.chat-layout {
+  height: 100%;
+  margin: 0;
+}
+
+html,
+body,
 textarea,
 button {
-  margin: 0;
   background: rgb(8, 9, 13);
   color: white;
   font-family: Manrope, Inter, sans-serif;
   font-weight: 500;
+  font-size: 14px;
 }
 
 .chat-layout {
   max-width: 600px;
-  height: 100vh;
   margin: 0 auto;
   padding: 10px;
   box-sizing: border-box;
