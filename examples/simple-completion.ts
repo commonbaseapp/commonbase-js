@@ -1,4 +1,4 @@
-import process from "process";
+import * as process from "process";
 
 // import { Client } from "@commonbase/sdk";
 import { Client } from "../index";
