@@ -1,0 +1,72 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500&display=swap");
+
+html,
+body,
+textarea,
+button {
+  margin: 0;
+  background: rgb(8, 9, 13);
+  color: white;
+  font-family: Manrope, Inter, sans-serif;
+  font-weight: 500;
+}
+
+.chat-layout {
+  max-width: 600px;
+  height: 100vh;
+  margin: 0 auto;
+  padding: 10px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.message {
+  padding: 10px;
+  width: fit-content;
+}
+
+.message:nth-child(odd) {
+  background: #3b3b3b;
+}
+
+.message:nth-child(even) {
+  background: #563af2;
+}
+
+form {
+  border: 2px solid rgb(148, 148, 148);
+  display: flex;
+}
+
+form:focus,
+form:focus-within,
+form:hover {
+  border-color: white;
+}
+
+textarea,
+button {
+  border: none;
+  outline: none;
+}
+
+textarea {
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+}
+
+button {
+}
