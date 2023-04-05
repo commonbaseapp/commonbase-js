@@ -50,3 +50,13 @@ const completion = await openai.createCompletion({
 });
 console.log(completion.data.choices[0].text);
 ```
+
+### Chat
+
+```typescript
+const chatClient = new ChatClient({ projectId: "xxx-xxx-xxx-xxx-xxx" });
+const response = chatClient.send("Hey Bot");
+console.log("Bot:");
+response.on("chunk", (text) => console.log(text));
+response.on("complete", () => console.log("<-- END OF TRANSMISSION -->"));
+```

@@ -1,7 +1,8 @@
 import * as process from "process";
 
 // import { Configuration, OpenAIApi } from "openai";
-import { Configuration, OpenAIApi } from "./openai";
+// import { Configuration, OpenAIApi } from "@commonbase/sdk/openai";
+import { Configuration, OpenAIApi } from "../openai";
 
 async function main() {
   const configuration = new Configuration({

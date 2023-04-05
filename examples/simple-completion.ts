@@ -1,6 +1,7 @@
 import process from "process";
 
-import { Client } from "./index";
+// import { Client } from "@commonbase/sdk";
+import { Client } from "../index";
 
 async function main() {
   const client = new Client({
