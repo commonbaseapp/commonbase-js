@@ -10,6 +10,16 @@ export type ClientOptions = {
   defaultVariables?: Record<string, string>;
 };
 
+type IsNode = typeof globalThis extends { process: unknown } ? true : false;
+
+export type ChatClientOptions = {
+  projectId: string;
+  sessionId?: string;
+  variables?: Record<string, string>;
+} & (IsNode extends true
+  ? { sessionData?: Record<string, string> }
+  : { INSECURE_sessionData?: Record<string, string> });
+
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;

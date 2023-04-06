@@ -57,8 +57,20 @@ console.log(completion.data.choices[0].text);
 
 ```typescript
 const chatClient = new ChatClient({ projectId: "xxx-xxx-xxx-xxx-xxx" });
-const response = chatClient.send("Hey Bot");
-console.log("Bot:");
-response.on("chunk", (text) => console.log(text));
-response.on("complete", () => console.log("<-- END OF TRANSMISSION -->"));
+const stream = chatClient.send("Hey Bot");
+while (true) {
+  const { done, value } = await stream.next();
+  if (done) {
+    break;
+  }
+  console.log(value);
+}
+```
+
+In browsers that support [async iteration of streams](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream#async_iteration) (currently only Firefox), you can just iterate over the stream
+
+```typescript
+for await (const chunk of stream) {
+  console.log(chunk);
+}
 ```

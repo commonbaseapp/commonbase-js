@@ -44,6 +44,11 @@ button {
   overflow-y: auto;
 }
 
+.feed-wrap,
+.feed {
+  height: 100%;
+}
+
 .feed,
 form {
   margin: 0 auto;
@@ -55,6 +60,8 @@ form {
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+  position: relative;
 }
 
 .message {
@@ -87,6 +94,22 @@ form {
   }
 }
 
+.stop-button {
+  position: sticky;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+
+  margin: 0 auto;
+  padding: 5px 10px;
+  width: fit-content;
+  background: rgb(46, 46, 46);
+}
+
+.stop-button:hover {
+  filter: invert();
+}
+
 form {
   border: 2px solid rgb(148, 148, 148);
   display: flex;
@@ -102,6 +125,7 @@ textarea,
 button {
   border: none;
   outline: none;
+  cursor: pointer;
 }
 
 textarea {
