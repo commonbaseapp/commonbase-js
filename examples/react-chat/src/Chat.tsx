@@ -1,58 +1,65 @@
 import "./Chat.css";
 
-import { ChatClient, StreamingChatResponse } from "@commonbase/sdk";
+import { ChatClient } from "@commonbase/sdk";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 
-function StreamingMessage({ response }: { response: StreamingChatResponse }) {
-  const [chunks, setChunks] = useState<string[]>([]);
-
-  useEffect(
-    () =>
-      response?.on("chunk", () => {
-        setChunks(response.chunks.slice());
-      }),
-    [response],
-  );
-
-  if (chunks.length == 0) {
-    return null;
-  }
-
-  return (
-    <div className="message">
-      {chunks.map((chunk, i) => (
-        <span key={i} className="chunk">
-          {chunk}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 export function Chat() {
   const [chatClient] = useState(
-    () => new ChatClient({ projectId: "xxx-xxx-xxx-xxx-xxx" }),
+    () => new ChatClient({ projectId: "f08b8d16-340e-4467-aaea-4d2eaf2d59dc" }),
   );
 
   const [inputValue, setInputValue] = useState("");
 
   const [history, setHistory] = useState<string[]>([]);
-  const [response, setResponse] = useState<StreamingChatResponse | null>(null);
 
-  useEffect(
-    () =>
-      response?.on("completed", () => {
-        setHistory((history) => [...history, response.chunks.join("")]);
-        setResponse(null);
-      }),
-    [response],
-  );
+  const [stream, setStream] = useState<ReturnType<
+    typeof chatClient.send
+  > | null>(null);
+  const [chunks, setChunks] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!stream) {
+      return;
+    }
+    let shouldExit = false;
+    const reader = stream.getReader();
+    (async () => {
+      while (true) {
+        const result = await reader.read();
+        if (result.done) {
+          break;
+        }
+        setChunks((chunks) => chunks.concat(result.value));
+        if (shouldExit) {
+          return;
+        }
+      }
+      setStream(null);
+    })();
+
+    return () => {
+      shouldExit = true;
+      reader.releaseLock();
+    };
+  }, [stream]);
+
+  useEffect(() => {
+    if (!stream && chunks.length > 0) {
+      setHistory((history) => [...history, chunks.join("")]);
+      setChunks([]);
+    }
+  }, [stream, chunks]);
 
   const handleSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
+
+    if (stream) {
+      return;
+    }
+
     setHistory((history) => [...history, inputValue]);
-    setResponse(chatClient.send(inputValue));
+    setStream(chatClient.send(inputValue));
     setInputValue("");
   };
 
@@ -65,21 +72,27 @@ export function Chat() {
               {content}
             </div>
           ))}
-          {response && <StreamingMessage response={response} />}
+          {chunks.length > 0 && (
+            <div className="message">
+              {chunks.map((chunk, i) => (
+                <span key={i} className="chunk">
+                  {chunk}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <form onSubmit={handleSubmit}>
         <textarea
-          placeholder={
-            response ? "Waiting for response..." : "Type a message..."
-          }
-          disabled={!!response}
+          placeholder={stream ? "Waiting for response..." : "Type a message..."}
           value={inputValue}
           onChange={(event) => {
             setInputValue(event.target.value);
           }}
           onKeyDown={(event) => {
             if (event.key == "Enter") {
+              event.preventDefault();
               handleSubmit();
             }
           }}
