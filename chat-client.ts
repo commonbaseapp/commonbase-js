@@ -30,8 +30,8 @@ export class ChatClient {
       }
 
       const handleError = (error: unknown) => {
-        // reject(error);
-        // cleanup();
+        reject(error);
+        cleanup();
       };
       wsClient.addEventListener("error", handleError);
 
