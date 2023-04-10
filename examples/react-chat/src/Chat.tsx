@@ -1,23 +1,52 @@
 import "./Chat.css";
 
 import { ChatClient } from "@commonbase/sdk";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
+import useLocalStorageState from "use-local-storage-state";
+
+function useChatClient(sessionId?: string): ChatClient | null {
+  const [chatClient, setChatClient] = useState<ChatClient | null>(null);
+  const isStartingRef = useRef(false);
+
+  useEffect(() => {
+    if (
+      isStartingRef.current ||
+      (chatClient && chatClient.sessionId == sessionId)
+    ) {
+      return;
+    }
+    isStartingRef.current = true;
+    ChatClient.start({
+      projectId: "********-****-****-****-************",
+      sessionId,
+    }).then((chatClient) => {
+      isStartingRef.current = false;
+      setChatClient(chatClient);
+    });
+  }, [sessionId]);
+
+  return chatClient;
+}
 
 export function Chat() {
-  const chatClient = useMemo(
-    () =>
-      new ChatClient({
-        // ********-****-****-****-************
-        projectId: "f08b8d16-340e-4467-aaea-4d2eaf2d59dc",
-        // sessionId: localStorage.getItem("sessionId") || undefined,
-      }),
-    [],
+  const [sessionId, setSessionId] = useLocalStorageState<string | undefined>(
+    "sessionId",
+    { defaultValue: undefined },
+  );
+  const chatClient = useChatClient(sessionId);
+  useEffect(() => {
+    if (chatClient) {
+      setSessionId(chatClient.sessionId);
+    }
+  }, [chatClient]);
+
+  const [history, setHistory] = useLocalStorageState<string[]>(
+    "history-" + chatClient?.sessionId,
+    { defaultValue: [] },
   );
 
   const [inputValue, setInputValue] = useState("");
-
-  const [history, setHistory] = useState<string[]>([]);
 
   const [reader, setReader] =
     useState<ReadableStreamDefaultReader<string> | null>(null);
@@ -57,19 +86,13 @@ export function Chat() {
   const handleSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
 
-    if (reader) {
+    if (reader || !chatClient) {
       return;
     }
 
     setHistory((history) => [...history, inputValue]);
     setReader(chatClient.send(inputValue).getReader());
     setInputValue("");
-
-    if (history.length == 0) {
-      chatClient.getSessionId().then((sessionId) => {
-        localStorage.setItem("sessionId", sessionId);
-      });
-    }
   };
 
   return (
