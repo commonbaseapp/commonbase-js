@@ -67,12 +67,14 @@ export class Client {
     const res = await fetch(`${rootApiUrl}/${path}`, {
       method: "POST",
       body: JSON.stringify({
+        ...this.options._extraParams,
         projectId: projectId || this.options.projectId,
         apiKey: this.options.apiKey,
         ...body,
         stream,
       }),
       headers: {
+        ...this.options._extraHeaders,
         "Content-Type": "application/json; charset=utf-8",
       },
     });
