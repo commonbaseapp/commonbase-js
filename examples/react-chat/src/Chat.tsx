@@ -1,48 +1,32 @@
 import "./Chat.css";
 
 import { ChatClient } from "@commonbase/sdk";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import useLocalStorageState from "use-local-storage-state";
 
-function useChatClient(sessionId?: string): ChatClient | null {
-  const [chatClient, setChatClient] = useState<ChatClient | null>(null);
-  const isStartingRef = useRef(false);
-
-  useEffect(() => {
-    if (
-      isStartingRef.current ||
-      (chatClient && chatClient.sessionId == sessionId)
-    ) {
-      return;
-    }
-    isStartingRef.current = true;
-    ChatClient.start({
-      projectId: "********-****-****-****-************",
-      sessionId,
-    }).then((chatClient) => {
-      isStartingRef.current = false;
-      setChatClient(chatClient);
-    });
-  }, [sessionId]);
-
-  return chatClient;
-}
+const projectId = "********-****-****-****-************";
 
 export function Chat() {
   const [sessionId, setSessionId] = useLocalStorageState<string | undefined>(
     "sessionId",
     { defaultValue: undefined },
   );
-  const chatClient = useChatClient(sessionId);
+  const [chatClient, setChatClient] = useState(
+    () => new ChatClient({ projectId, sessionId }),
+  );
+  const [isConnected, setIsConnected] = useState(false);
+
   useEffect(() => {
-    if (chatClient) {
-      setSessionId(chatClient.sessionId);
-    }
+    chatClient.start();
+    return chatClient.on("open", (sessionId) => {
+      setSessionId(sessionId);
+      setIsConnected(true);
+    });
   }, [chatClient]);
 
   const [history, setHistory] = useLocalStorageState<string[]>(
-    "history-" + chatClient?.sessionId,
+    "history-" + sessionId,
     { defaultValue: [] },
   );
 
@@ -86,7 +70,7 @@ export function Chat() {
   const handleSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
 
-    if (reader || !chatClient) {
+    if (reader || !isConnected) {
       return;
     }
 
@@ -97,6 +81,20 @@ export function Chat() {
 
   return (
     <div className="chat-layout">
+      <div className="indicator">
+        {isConnected ? "🟢 Connected" : "🟠 Loading"}{" "}
+        {sessionId && `(${sessionId.substring(0, 6)}...)`}
+        <button
+          title="Clear session"
+          onClick={() => {
+            setSessionId(undefined);
+            setChatClient(new ChatClient({ projectId }));
+            setIsConnected(false);
+          }}
+        >
+          ❌
+        </button>
+      </div>
       <div className="feed-wrap">
         <div className="feed">
           {history.map((content, i) => (

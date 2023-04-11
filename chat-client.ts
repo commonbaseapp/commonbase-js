@@ -2,7 +2,7 @@ import { ChatClientOptions } from "./types";
 
 async function startWebSocketSession(options: ChatClientOptions) {
   return new Promise<[WebSocket, string]>((resolve, reject) => {
-    const wsClient = new WebSocket(
+    const ws = new WebSocket(
       "wss://api.commonbase.com/chats" +
         ("sessionId" in options && options.sessionId
           ? "/" + options.sessionId
@@ -10,15 +10,15 @@ async function startWebSocketSession(options: ChatClientOptions) {
     );
 
     function cleanup() {
-      wsClient.removeEventListener("error", handleError);
-      wsClient.removeEventListener("message", handleMessage);
+      ws.removeEventListener("error", handleError);
+      ws.removeEventListener("message", handleMessage);
     }
 
     const handleError = (error: unknown) => {
       reject(error);
       cleanup();
     };
-    wsClient.addEventListener("error", handleError);
+    ws.addEventListener("error", handleError);
 
     const handleMessage = (event: MessageEvent<string>): void => {
       const msg = JSON.parse(event.data);
@@ -34,7 +34,7 @@ async function startWebSocketSession(options: ChatClientOptions) {
             const sessionId =
               msg.sessionId ?? ("sessionId" in options && options.sessionId);
             if (sessionId) {
-              resolve([wsClient, sessionId]);
+              resolve([ws, sessionId]);
             } else {
               reject("Missing sessionId");
             }
@@ -43,7 +43,7 @@ async function startWebSocketSession(options: ChatClientOptions) {
         }
       }
     };
-    wsClient.addEventListener("message", handleMessage);
+    ws.addEventListener("message", handleMessage);
 
     function handleOpen() {
       const message =
@@ -61,10 +61,10 @@ async function startWebSocketSession(options: ChatClientOptions) {
                   : {},
             };
 
-      wsClient.send(JSON.stringify(message));
-      wsClient.removeEventListener("open", handleOpen);
+      ws.send(JSON.stringify(message));
+      ws.removeEventListener("open", handleOpen);
     }
-    wsClient.addEventListener("open", handleOpen);
+    ws.addEventListener("open", handleOpen);
   });
 }
 
@@ -75,23 +75,35 @@ function calculateExponentialBackoffMs(attempt: number): number {
 }
 
 export class ChatClient {
-  sessionId: string;
-
-  private webSocket: WebSocket;
   private _lastRequestId = 0;
+  private _options: ChatClientOptions;
 
-  private constructor(webSocketClient: WebSocket, sessionId: string) {
-    this.webSocket = webSocketClient;
-    this.sessionId = sessionId;
+  private _webSocket: WebSocket | null = null;
+
+  constructor(options: ChatClientOptions) {
+    this._options = options;
   }
 
-  static async start(options: ChatClientOptions): Promise<ChatClient> {
+  // Since we only have one event atm, we can keep it simple
+  private _openListeners = new Set<(sessionId: string) => void>();
+  on(_eventName: "open", listener: (sessionId: string) => void) {
+    this._openListeners.add(listener);
+    return () => {
+      this._openListeners.delete(listener);
+    };
+  }
+
+  async start(): Promise<void> {
     let i = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const [webSocketClient, sessionId] = await startWebSocketSession(options);
-      if (webSocketClient.readyState == WebSocket.OPEN) {
-        return new ChatClient(webSocketClient, sessionId);
+      const [webSocket, sessionId] = await startWebSocketSession(this._options);
+      if (webSocket.readyState == WebSocket.OPEN) {
+        this._webSocket = webSocket;
+        for (const listener of this._openListeners) {
+          listener(sessionId);
+        }
+        break;
       }
       await new Promise((resolve) =>
         setTimeout(resolve, calculateExponentialBackoffMs(i)),
@@ -103,6 +115,7 @@ export class ChatClient {
   send = (content: string): ReadableStream<string> => {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const chatClient = this;
+    const ws = chatClient._webSocket;
 
     let isCancelled = false;
     return new ReadableStream({
@@ -111,7 +124,7 @@ export class ChatClient {
 
         function handleMessage(event: MessageEvent<string>) {
           if (isCancelled) {
-            chatClient.webSocket.removeEventListener("message", handleMessage);
+            ws?.removeEventListener("message", handleMessage);
             return;
           }
 
@@ -126,26 +139,24 @@ export class ChatClient {
           }
           if (msg.aborted) {
             controller.close();
-            chatClient.webSocket.removeEventListener("message", handleMessage);
+            ws?.removeEventListener("message", handleMessage);
             return;
           }
 
           if (msg.completed) {
             controller.close();
-            chatClient.webSocket.removeEventListener("message", handleMessage);
+            ws?.removeEventListener("message", handleMessage);
           } else {
             controller.enqueue(msg.choices[0].text);
           }
         }
 
-        chatClient.webSocket.addEventListener("message", handleMessage);
-        chatClient.webSocket.send(
-          JSON.stringify({ type: "chatMessage", requestId, content }),
-        );
+        ws?.addEventListener("message", handleMessage);
+        ws?.send(JSON.stringify({ type: "chatMessage", requestId, content }));
       },
       cancel() {
         isCancelled = true;
-        chatClient.webSocket.send(JSON.stringify({ type: "abort" }));
+        ws?.send(JSON.stringify({ type: "abort" }));
       },
     });
   };

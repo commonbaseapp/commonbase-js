@@ -40,6 +40,21 @@ button {
   gap: 15px;
 }
 
+.indicator,
+.feed,
+form {
+  margin: 0 auto;
+  max-width: 600px;
+  width: 100%;
+}
+
+.indicator button {
+  visibility: hidden;
+}
+.indicator:hover button {
+  visibility: visible;
+}
+
 .feed-wrap {
   overflow-y: auto;
 }
@@ -47,13 +62,6 @@ button {
 .feed-wrap,
 .feed {
   height: 100%;
-}
-
-.feed,
-form {
-  margin: 0 auto;
-  max-width: 600px;
-  width: 100%;
 }
 
 .feed {
