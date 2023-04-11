@@ -47,9 +47,5 @@
   "peerDependencies": {
     "axios": "^0.26.1",
     "openai": "^3.2.1"
-  },
-  "dependencies": {
-    "web-streams-polyfill": "^3.2.1",
-    "websocket": "^1.0.34"
   }
 }

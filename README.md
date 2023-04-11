@@ -55,6 +55,8 @@ console.log(completion.data.choices[0].text);
 
 ### Chat
 
+The Chat API is dependant on the [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) API, if you are intending to use it from a Node (or other) environment you have to make a compatible WebSocket implementation globally available like [websockets/ws](https://github.com/websockets/ws).
+
 ```typescript
 const chatClient = new ChatClient({ projectId: "xxx-xxx-xxx-xxx-xxx" });
 const stream = chatClient.send("Hey Bot");
