@@ -38,3 +38,10 @@ export type APIResponse = {
   model: string;
   choices: APIResponseChoice[];
 };
+
+export type APIErrorResponse = {
+  error: string;
+  invocationId?: string;
+  providerError?: string;
+  sentryId?: string;
+};

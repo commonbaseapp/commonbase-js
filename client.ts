@@ -1,5 +1,6 @@
 import { rootApiUrl } from "./constants";
 import {
+  APIErrorResponse,
   APIResponse,
   ChatContext,
   ClientOptions,
@@ -53,6 +54,18 @@ class StreamConsumer {
   }
 }
 
+export class APIError extends Error {
+  public readonly errorResponse: APIErrorResponse;
+  constructor(status: number, errorResponse: APIErrorResponse) {
+    super(
+      `api error (status=${status}): ${
+        errorResponse.providerError || errorResponse.error
+      }`,
+    );
+    this.errorResponse = errorResponse;
+  }
+}
+
 export class Client {
   private options: ClientOptions;
   private readonly apiUrl: string;
@@ -83,7 +96,7 @@ export class Client {
 
     if (!res.ok) {
       const resBody = await res.json();
-      throw new Error(`api error (status=${res.status}): ${resBody.error}`);
+      throw new APIError(res.status, resBody);
     }
 
     if (!stream) {
