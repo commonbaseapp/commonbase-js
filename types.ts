@@ -8,6 +8,7 @@ export type ClientOptions = {
   projectId?: string;
   apiKey?: string;
   defaultVariables?: Record<string, string>;
+  _apiUrl?: string;
   _extraHeaders?: Record<string, string>;
   _extraParams?: Record<string, string | number | boolean>;
 };

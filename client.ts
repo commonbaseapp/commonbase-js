@@ -55,8 +55,10 @@ class StreamConsumer {
 
 export class Client {
   private options: ClientOptions;
+  private readonly apiUrl: string;
   constructor(options?: ClientOptions) {
     this.options = options || {};
+    this.apiUrl = this.options._apiUrl || rootApiUrl;
   }
   private async fetchAPI(
     path: string,
@@ -64,7 +66,7 @@ export class Client {
     projectId?: string,
     stream = false,
   ): Promise<APIResponse | StreamConsumer> {
-    const res = await fetch(`${rootApiUrl}/${path}`, {
+    const res = await fetch(`${this.apiUrl}/${path}`, {
       method: "POST",
       body: JSON.stringify({
         ...this.options._extraParams,
