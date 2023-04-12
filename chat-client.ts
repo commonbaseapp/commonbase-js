@@ -1,9 +1,11 @@
 import { ChatClientOptions } from "./types";
 
+const WEBSOCKET_URL = "wss://api.commonbase.com/chats";
+
 async function startWebSocketSession(options: ChatClientOptions) {
   return new Promise<[WebSocket, string]>((resolve, reject) => {
     const ws = new WebSocket(
-      "wss://api.commonbase.com/chats" +
+      WEBSOCKET_URL +
         ("sessionId" in options && options.sessionId
           ? "/" + options.sessionId
           : ""),
@@ -14,17 +16,21 @@ async function startWebSocketSession(options: ChatClientOptions) {
       ws.removeEventListener("message", handleMessage);
     }
 
-    const handleError = (error: unknown) => {
-      reject(error);
+    const handleError = (error: Error | Event) => {
+      reject(
+        error instanceof Event
+          ? new Error("Unknown error when starting WebSocket")
+          : error,
+      );
       cleanup();
     };
-    ws.addEventListener("error", handleError);
+    ws.addEventListener("error", () => handleError);
 
     const handleMessage = (event: MessageEvent<string>): void => {
       const msg = JSON.parse(event.data);
       if (msg.type === "init" || msg.type == "info") {
         if (msg.error) {
-          handleError(msg.error);
+          handleError(new Error(msg.error));
           return;
         }
         if (msg.initialized) {
@@ -36,7 +42,7 @@ async function startWebSocketSession(options: ChatClientOptions) {
             if (sessionId) {
               resolve([ws, sessionId]);
             } else {
-              reject("Missing sessionId");
+              reject(new Error("Missing sessionId"));
             }
           }
           cleanup();
@@ -46,21 +52,22 @@ async function startWebSocketSession(options: ChatClientOptions) {
     ws.addEventListener("message", handleMessage);
 
     function handleOpen() {
-      const message =
-        "sessionId" in options && options.sessionId
-          ? { type: "info" }
-          : {
-              type: "init",
-              projectId: options.projectId,
-              variables: "variables" in options ? options.variables : {},
-              sessionData:
-                "INSECURE_sessionData" in options
-                  ? options.INSECURE_sessionData
-                  : "sessionData" in options
-                  ? options.sessionData
-                  : {},
-            };
-
+      let message;
+      if ("sessionId" in options && options.sessionId) {
+        message = { type: "info" };
+      } else {
+        message = {
+          type: "init",
+          projectId: options.projectId,
+          variables: "variables" in options ? options.variables : {},
+          sessionData:
+            "INSECURE_sessionData" in options
+              ? options.INSECURE_sessionData
+              : "sessionData" in options
+              ? options.sessionData
+              : {},
+        };
+      }
       ws.send(JSON.stringify(message));
       ws.removeEventListener("open", handleOpen);
     }
