@@ -1,49 +1,79 @@
-import memoizeOne from "memoize-one";
+import { ChatClientOptions } from "./types";
 
-import { ClientOptions } from "./types";
+const WEBSOCKET_URL = "wss://api.commonbase.com/chats";
 
-const initializeWSClient = memoizeOne(async (projectId: string) => {
-  return new Promise<WebSocket>((resolve, reject) => {
-    const wsClient = new WebSocket("wss://api.commonbase.com/chats");
+async function startWebSocketSession(options: ChatClientOptions) {
+  return new Promise<[WebSocket, string]>((resolve, reject) => {
+    const ws = new WebSocket(
+      WEBSOCKET_URL +
+        ("sessionId" in options && options.sessionId
+          ? "/" + options.sessionId
+          : ""),
+    );
 
     function cleanup() {
-      wsClient.removeEventListener("error", handleError);
-      wsClient.removeEventListener("message", handleMessage);
+      ws.removeEventListener("error", handleError);
+      ws.removeEventListener("message", handleMessage);
     }
 
-    const handleError = (error: Event) => {
-      reject(error);
+    const handleError = (error: Error | Event) => {
+      reject(
+        error instanceof Event
+          ? new Error("Unknown error when starting WebSocket")
+          : error,
+      );
       cleanup();
     };
-    wsClient.addEventListener("error", handleError);
+    ws.addEventListener("error", () => handleError);
 
     const handleMessage = (event: MessageEvent<string>): void => {
       const msg = JSON.parse(event.data);
-      if (msg.type === "init") {
+      if (msg.type === "init" || msg.type == "info") {
         if (msg.error) {
-          reject(msg.error);
-          cleanup();
+          handleError(new Error(msg.error));
           return;
         }
         if (msg.initialized) {
-          if (msg.error) {
+          if (msg.error && msg.initialized !== 0) {
             reject(msg.error);
           } else {
-            resolve(wsClient);
+            const sessionId =
+              msg.sessionId ?? ("sessionId" in options && options.sessionId);
+            if (sessionId) {
+              resolve([ws, sessionId]);
+            } else {
+              reject(new Error("Missing sessionId"));
+            }
           }
           cleanup();
         }
       }
     };
-    wsClient.addEventListener("message", handleMessage);
+    ws.addEventListener("message", handleMessage);
 
     function handleOpen() {
-      wsClient.send(JSON.stringify({ type: "init", projectId }));
-      wsClient.removeEventListener("open", handleOpen);
+      let message;
+      if ("sessionId" in options && options.sessionId) {
+        message = { type: "info" };
+      } else {
+        message = {
+          type: "init",
+          projectId: options.projectId,
+          variables: "variables" in options ? options.variables : {},
+          sessionData:
+            "INSECURE_sessionData" in options
+              ? options.INSECURE_sessionData
+              : "sessionData" in options
+              ? options.sessionData
+              : {},
+        };
+      }
+      ws.send(JSON.stringify(message));
+      ws.removeEventListener("open", handleOpen);
     }
-    wsClient.addEventListener("open", handleOpen);
+    ws.addEventListener("open", handleOpen);
   });
-});
+}
 
 function calculateExponentialBackoffMs(attempt: number): number {
   const INTERVAL_MS = 100;
@@ -51,56 +81,37 @@ function calculateExponentialBackoffMs(attempt: number): number {
   return INTERVAL_MS * EXPONENTIAL ** attempt;
 }
 
-class _StreamingChatResponse {
-  isCompleted = false;
-  chunks: string[] = [];
+export class ChatClient {
+  private _lastRequestId = 0;
+  private _options: ChatClientOptions;
 
-  constructor(
-    startStream: (events: {
-      onChunk: (chunk: string) => void;
-      onCompleted: () => void;
-    }) => void,
-  ) {
-    startStream({
-      onChunk: (chunk) => {
-        this.chunks.push(chunk);
-        this.listeners.chunk.forEach((f) => f());
-      },
-      onCompleted: () => {
-        this.isCompleted = true;
-        this.listeners.completed.forEach((f) => f());
-      },
-    });
+  private _webSocket: WebSocket | null = null;
+
+  constructor(options: ChatClientOptions) {
+    this._options = options;
   }
 
-  private listeners = Object.fromEntries(
-    (["chunk", "completed"] as const).map((key) => [key, new Set()]),
-  ) as Record<"chunk" | "completed", Set<() => void>>;
-  on(eventName: keyof typeof this.listeners, listener: () => void) {
-    this.listeners[eventName].add(listener);
+  // Since we only have one event atm, we can keep it simple
+  private _openListeners = new Set<(sessionId: string) => void>();
+  on(_eventName: "open", listener: (sessionId: string) => void) {
+    this._openListeners.add(listener);
     return () => {
-      this.listeners[eventName].delete(listener);
+      this._openListeners.delete(listener);
     };
   }
-}
-export type StreamingChatResponse = InstanceType<typeof _StreamingChatResponse>;
 
-export class ChatClient {
-  private options: ClientOptions;
-  constructor(options: ClientOptions = {}) {
-    this.options = options || {};
-  }
-
-  private async getWebSocketClient() {
+  async start(): Promise<void> {
     let i = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const webSocketClient = await initializeWSClient(this.options.projectId!);
-      if (webSocketClient.readyState == WebSocket.OPEN) {
-        return webSocketClient;
+      const [webSocket, sessionId] = await startWebSocketSession(this._options);
+      if (webSocket.readyState == WebSocket.OPEN) {
+        this._webSocket = webSocket;
+        for (const listener of this._openListeners) {
+          listener(sessionId);
+        }
+        break;
       }
-      initializeWSClient.clear();
       await new Promise((resolve) =>
         setTimeout(resolve, calculateExponentialBackoffMs(i)),
       );
@@ -108,37 +119,52 @@ export class ChatClient {
     }
   }
 
-  private lastRequestId = 0;
-  send = (content: string): StreamingChatResponse =>
-    new _StreamingChatResponse(async ({ onChunk, onCompleted }) => {
-      const wsClient = await this.getWebSocketClient();
-      const requestId = (this.lastRequestId++).toString();
+  send = (content: string): ReadableStream<string> => {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const chatClient = this;
+    const ws = chatClient._webSocket;
 
-      function handleMessage(event: MessageEvent<string>) {
-        const msg = JSON.parse(event.data);
+    let isCancelled = false;
+    return new ReadableStream({
+      async start(controller) {
+        const requestId = (chatClient._lastRequestId++).toString();
 
-        if (msg.type !== "chatMessage" || msg.requestId !== requestId) {
-          return;
-        }
-        if (msg.error) {
-          console.error("chatMessage error:", msg.error);
-          return;
-        }
-        if (msg.aborted) {
-          // TODO
-          return;
-        }
-        if (msg.completed) {
-          onCompleted();
-          wsClient.removeEventListener("message", handleMessage);
-        } else {
-          onChunk(msg.choices[0].text);
-        }
-      }
+        function handleMessage(event: MessageEvent<string>) {
+          if (isCancelled) {
+            ws?.removeEventListener("message", handleMessage);
+            return;
+          }
 
-      wsClient.addEventListener("message", handleMessage);
-      wsClient.send(
-        JSON.stringify({ type: "chatMessage", requestId, content }),
-      );
+          const msg = JSON.parse(event.data);
+
+          if (msg.type !== "chatMessage" || msg.requestId !== requestId) {
+            return;
+          }
+          if (msg.error) {
+            controller.error(msg.error);
+            return;
+          }
+          if (msg.aborted) {
+            controller.close();
+            ws?.removeEventListener("message", handleMessage);
+            return;
+          }
+
+          if (msg.completed) {
+            controller.close();
+            ws?.removeEventListener("message", handleMessage);
+          } else {
+            controller.enqueue(msg.choices[0].text);
+          }
+        }
+
+        ws?.addEventListener("message", handleMessage);
+        ws?.send(JSON.stringify({ type: "chatMessage", requestId, content }));
+      },
+      cancel() {
+        isCancelled = true;
+        ws?.send(JSON.stringify({ type: "abort" }));
+      },
     });
+  };
 }
