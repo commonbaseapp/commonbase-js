@@ -14,8 +14,12 @@ const client = new Client({
 });
 
 async function askQuestion(question: string) {
-  return client.createStreamingCompletion({}, "anonymous-example-user", {
-    messages: [{ role: "user", content: question }],
+  return client.createStreamingCompletion({
+    variables: {},
+    userId: "anonymous-example-user",
+    chatContext: {
+      messages: [{ role: "user", content: question }],
+    },
   });
 }
 
@@ -39,7 +43,7 @@ async function main() {
         process.stdout.write("\n\n");
         continue;
       }
-      process.stdout.write(completionResult.choices[0].text);
+      process.stdout.write(completionResult.bestResult);
     }
   }
 

@@ -8,7 +8,9 @@ async function main() {
     projectId: process.env.CB_PROJECT_ID,
   });
   const completionStream = await client.createStreamingCompletion({
-    user: "Alice",
+    variables: {
+      user: "Alice",
+    },
   });
   for await (const completionResult of completionStream) {
     if (completionResult.completed) {
@@ -16,7 +18,7 @@ async function main() {
       console.log("streamCompleted", completionResult);
       continue;
     }
-    process.stdout.write(completionResult.choices[0].text);
+    process.stdout.write(completionResult.bestResult);
   }
 
   console.log("done");

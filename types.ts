@@ -1,13 +1,38 @@
-export type CompletionResults = {
-  bestResult: string;
-  choices: string[];
-  _raw: APIResponse;
-};
+export class CompletionResult {
+  private readonly _rawResponse: APIResponse;
+  constructor(response: APIResponse) {
+    this._rawResponse = response;
+  }
+
+  private assertChoices() {
+    if (!this._rawResponse.choices?.length) {
+      throw new Error("no completions found");
+    }
+  }
+  get bestResult(): string {
+    this.assertChoices();
+    return this._rawResponse.choices[0].text;
+  }
+
+  get choices(): string[] {
+    this.assertChoices();
+    return this._rawResponse.choices.map((c) => c.text);
+  }
+
+  get completed(): boolean {
+    return this._rawResponse.completed;
+  }
+
+  get _raw(): APIResponse {
+    return this._rawResponse;
+  }
+}
 
 export type ClientOptions = {
   projectId?: string;
   apiKey?: string;
   defaultVariables?: Record<string, string>;
+  defaultTruncateVariableConfig?: TruncationConfig;
   _apiUrl?: string;
   _extraHeaders?: Record<string, string>;
   _extraParams?: Record<string, string | number | boolean>;
@@ -26,8 +51,10 @@ export type ChatClientOptions = {
       : { INSECURE_sessionData?: Record<string, string> }))
 );
 
+export type Role = "system" | "user" | "assistant";
+
 export type ChatMessage = {
-  role: "system" | "user" | "assistant";
+  role: Role;
   content: string;
 };
 
@@ -39,8 +66,16 @@ type APIResponseChoice = {
   index: number;
   finish_reason: string;
   text: string;
-  role?: "system" | "user" | "assistant";
+  role?: Role;
   logprobs?: number;
+};
+
+type TruncationResult = {
+  config: TruncationConfig;
+  cutoff: number;
+  truncated: boolean;
+  promptTokens: number;
+  iterations: number;
 };
 
 export type APIResponse = {
@@ -50,6 +85,7 @@ export type APIResponse = {
   type: string;
   model: string;
   choices: APIResponseChoice[];
+  variableTruncation?: TruncationResult;
 };
 
 export type APIErrorResponse = {
@@ -57,4 +93,19 @@ export type APIErrorResponse = {
   invocationId?: string;
   providerError?: string;
   sentryId?: string;
+};
+
+export type TruncationConfig = {
+  strategy: "truncate_head" | "truncate_tail" | "off"; // default: off
+  granularity?: "word" | "line"; // default: line
+  maxPromptTokens?: number;
+  name?: string;
+};
+
+export type CompletionConfig = {
+  variables: Record<string, string>;
+  userId?: string;
+  chatContext?: ChatContext;
+  projectId?: string;
+  truncateVariable?: TruncationConfig;
 };

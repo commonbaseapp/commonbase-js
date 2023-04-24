@@ -2,9 +2,9 @@ import { rootApiUrl } from "./constants";
 import {
   APIErrorResponse,
   APIResponse,
-  ChatContext,
   ClientOptions,
-  CompletionResults,
+  CompletionConfig,
+  CompletionResult,
 } from "./types";
 
 class StreamConsumer {
@@ -26,7 +26,7 @@ class StreamConsumer {
     this.buffer = new Uint8Array([...this.buffer, ...value]);
   }
 
-  async next(): Promise<IteratorResult<APIResponse>> {
+  async next(): Promise<IteratorResult<CompletionResult>> {
     const newlineIndex = this.buffer.indexOf(10);
     if (newlineIndex === -1 && !this.streamDrained) {
       await this.read();
@@ -47,7 +47,7 @@ class StreamConsumer {
     } catch (e) {
       throw new Error(`invalid stream data: ${line.slice(6)}`);
     }
-    return { done: false, value: data };
+    return { done: false, value: new CompletionResult(data) };
   }
   [Symbol.asyncIterator]() {
     return this;
@@ -73,19 +73,31 @@ export class Client {
     this.options = options || {};
     this.apiUrl = this.options._apiUrl || rootApiUrl;
   }
+
+  private getBody(config: CompletionConfig) {
+    return {
+      ...this.options._extraParams,
+      projectId: config.projectId || this.options.projectId,
+      apiKey: this.options.apiKey,
+      variables: {
+        ...this.options.defaultVariables,
+        ...config.variables,
+      },
+      context: config.chatContext,
+      userId: config.userId,
+      truncateVariable:
+        config.truncateVariable || this.options.defaultTruncateVariableConfig,
+    };
+  }
   private async fetchAPI(
     path: string,
-    body: object,
-    projectId?: string,
+    config: CompletionConfig,
     stream = false,
   ): Promise<APIResponse | StreamConsumer> {
     const res = await fetch(`${this.apiUrl}/${path}`, {
       method: "POST",
       body: JSON.stringify({
-        ...this.options._extraParams,
-        projectId: projectId || this.options.projectId,
-        apiKey: this.options.apiKey,
-        ...body,
+        ...this.getBody(config),
         stream,
       }),
       headers: {
@@ -107,53 +119,19 @@ export class Client {
     }
     return new StreamConsumer(res.body);
   }
-  async createCompletion(
-    variables: Record<string, string>,
-    userId?: string,
-    chatContext?: ChatContext,
-    projectId?: string,
-  ): Promise<CompletionResults> {
+
+  async createCompletion(config: CompletionConfig): Promise<CompletionResult> {
     const completionsRes = (await this.fetchAPI(
       "completions",
-      {
-        variables: {
-          ...this.options.defaultVariables,
-          ...variables,
-        },
-        context: chatContext,
-        userId,
-      },
-      projectId,
+      config,
     )) as APIResponse;
 
-    if (!completionsRes.choices || completionsRes.choices.length === 0) {
-      throw new Error("no completions found");
-    }
-    return {
-      bestResult: completionsRes.choices[0].text,
-      choices: completionsRes.choices.map((c) => c.text),
-      _raw: completionsRes,
-    };
+    return new CompletionResult(completionsRes);
   }
 
   async createStreamingCompletion(
-    variables: Record<string, string>,
-    userId?: string,
-    chatContext?: ChatContext,
-    projectId?: string,
+    config: CompletionConfig,
   ): Promise<StreamConsumer> {
-    return (await this.fetchAPI(
-      "completions",
-      {
-        variables: {
-          ...this.options.defaultVariables,
-          ...variables,
-        },
-        context: chatContext,
-        userId,
-      },
-      projectId,
-      true,
-    )) as StreamConsumer;
+    return (await this.fetchAPI("completions", config, true)) as StreamConsumer;
   }
 }

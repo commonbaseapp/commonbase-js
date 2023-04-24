@@ -37,17 +37,17 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
     options?: AxiosRequestConfig,
   ) {
     // return super.createChatCompletion(createChatCompletionRequest, options);
-    const res = await this.cbClient.createCompletion(
-      createChatCompletionRequest.variables || {},
-      createChatCompletionRequest.user,
-      {
+    const res = await this.cbClient.createCompletion({
+      variables: createChatCompletionRequest.variables || {},
+      userId: createChatCompletionRequest.user,
+      chatContext: {
         messages: createChatCompletionRequest.messages,
       },
-      createChatCompletionRequest.projectId,
-    );
+      projectId: createChatCompletionRequest.projectId,
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    res._raw.choices = res._raw.choices.map((choice: any) => {
+    const transformedChoices = res._raw.choices.map((choice: any) => {
       // transform text response to messages response
       choice.message = {
         content: choice.text,
@@ -60,7 +60,7 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
 
     return {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: res._raw as any,
+      data: { ...(res._raw as any), choices: transformedChoices },
       status: 200,
       headers: {},
       config: options,
@@ -77,12 +77,12 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
         ? createCompletionRequest.prompt
         : undefined);
 
-    const res = await this.cbClient.createCompletion(
-      createCompletionRequest.variables || {},
-      createCompletionRequest.user,
-      undefined,
+    const res = await this.cbClient.createCompletion({
+      variables: createCompletionRequest.variables || {},
+      userId: createCompletionRequest.user,
       projectId,
-    );
+    });
+
     return {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: res._raw as any,
