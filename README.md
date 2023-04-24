@@ -20,8 +20,10 @@ const client = new Client({
 });
 
 const completionResult = await client.createCompletion({
-  user_name: "Alice",
-  project_name: "my-galaxy",
+  variables: {
+    user_name: "Alice",
+    project_name: "my-galaxy",
+  },
 });
 
 console.log(completionResult.bestResult);
