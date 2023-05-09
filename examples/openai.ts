@@ -12,25 +12,18 @@ async function main() {
 
   const completion = await openai.createCompletion({
     model: "text-davinci-003",
-    // prompt: "Hello World!",
+    prompt: "Hello World, my name is Alice!",
     projectId: process.env.CB_PROJECT_ID,
-    variables: {
-      user: "Alice",
-    },
   });
   console.log(completion.data.choices[0].text);
 
   const chatCompletion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
-    // prompt: "Hello World!",
     projectId: process.env.CB_PROJECT_ID,
-    variables: {
-      user: "Alice",
-    },
     messages: [
       {
         role: "user",
-        content: "Hello, how are you?",
+        content: "Hello, my name is Alice. How are you?",
       },
     ],
   });

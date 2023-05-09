@@ -9,13 +9,13 @@ export * from "openai";
 interface CreateCompletionRequest
   extends originalOpenAI.CreateCompletionRequest {
   variables?: Record<string, string>;
-  projectId?: string;
+  projectId: string;
 }
 
 interface CreatChatCompletionRequest
   extends originalOpenAI.CreateChatCompletionRequest {
   variables?: Record<string, string>;
-  projectId?: string;
+  projectId: string;
 }
 
 // override the OpenAIApi class to use the commonbase client
@@ -44,6 +44,23 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
         messages: createChatCompletionRequest.messages,
       },
       projectId: createChatCompletionRequest.projectId,
+      prompt: "\n", // we need to set prompt to avoid the default prompt
+      providerConfig: {
+        provider: "openai",
+        params: {
+          type: "chat",
+          model: createChatCompletionRequest.model,
+          max_tokens: createChatCompletionRequest.max_tokens || undefined,
+          temperature: createChatCompletionRequest.temperature || undefined,
+          top_p: createChatCompletionRequest.top_p || undefined,
+          n: createChatCompletionRequest.n || undefined,
+          frequency_penalty:
+            createChatCompletionRequest.frequency_penalty || undefined,
+          presence_penalty:
+            createChatCompletionRequest.presence_penalty || undefined,
+          stop: createChatCompletionRequest.stop || undefined,
+        },
+      },
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,16 +88,30 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
     createCompletionRequest: CreateCompletionRequest,
     options?: AxiosRequestConfig,
   ) {
-    const projectId =
-      createCompletionRequest.projectId ||
-      (typeof createCompletionRequest.prompt === "string"
-        ? createCompletionRequest.prompt
-        : undefined);
-
     const res = await this.cbClient.createCompletion({
       variables: createCompletionRequest.variables || {},
       userId: createCompletionRequest.user,
-      projectId,
+      projectId: createCompletionRequest.projectId,
+      prompt: createCompletionRequest.prompt?.toString(),
+      providerConfig: {
+        provider: "openai",
+        params: {
+          type: "text",
+          model: createCompletionRequest.model,
+          max_tokens: createCompletionRequest.max_tokens || undefined,
+          temperature: createCompletionRequest.temperature || undefined,
+          top_p: createCompletionRequest.top_p || undefined,
+          n: createCompletionRequest.n || undefined,
+          frequency_penalty:
+            createCompletionRequest.frequency_penalty || undefined,
+          presence_penalty:
+            createCompletionRequest.presence_penalty || undefined,
+          stop: createCompletionRequest.stop || undefined,
+          best_of: createCompletionRequest.best_of || undefined,
+          suffix: createCompletionRequest.suffix || undefined,
+          logprobs: createCompletionRequest.logprobs || undefined,
+        },
+      },
     });
 
     return {
