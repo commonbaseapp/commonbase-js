@@ -87,6 +87,8 @@ export class Client {
       userId: config.userId,
       truncateVariable:
         config.truncateVariable || this.options.defaultTruncateVariableConfig,
+      prompt: config.prompt,
+      providerConfig: config.providerConfig,
     };
   }
   private async fetchAPI(

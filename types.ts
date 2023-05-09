@@ -102,10 +102,43 @@ export type TruncationConfig = {
   name?: string;
 };
 
+type ProviderConfig =
+  | {
+      provider: "openai";
+      params: {
+        type: "chat" | "text";
+        model?: string;
+        temperature?: number;
+        top_p?: number;
+        max_tokens?: number;
+        n?: number;
+        frequency_penalty?: number;
+        presence_penalty?: number;
+        stop?: string[] | string;
+        best_of?: number;
+        suffix?: string;
+        logprobs?: number;
+      };
+    }
+  | {
+      provider: "anthropic";
+      params: {
+        type: "chat" | undefined;
+        model?: string;
+        max_tokens_to_sample?: number;
+        temperature?: number;
+        stop_sequences?: string[];
+        top_k?: number;
+        top_p?: number;
+      };
+    };
+
 export type CompletionConfig = {
   variables: Record<string, string>;
   userId?: string;
   chatContext?: ChatContext;
   projectId?: string;
   truncateVariable?: TruncationConfig;
+  prompt?: string;
+  providerConfig?: ProviderConfig;
 };
