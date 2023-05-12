@@ -42,22 +42,17 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 const completion = await openai.createCompletion({
-  // the model will be ignored and the configured model from the project will be used
   model: "text-davinci-003",
-  // prompt: "Hello World!", // prompt is not needed anymore
-  // set this to you project id
+  prompt: "Hello World, my name is Alice!",
+  // you need to add your project id
   projectId: "xxx-xxx-xxx-xxx-xxx",
-  // configure the prompt variables
-  variables: {
-    user: "Alice",
-  },
 });
 console.log(completion.data.choices[0].text);
 ```
 
 ### Chat
 
-The Chat API is dependant on the [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) API, if you are intending to use it from a Node (or other) environment you have to make a compatible WebSocket implementation globally available like [websockets/ws](https://github.com/websockets/ws).
+The Chat API is dependent on the [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) API, if you are intending to use it from a Node (or other) environment you have to make a compatible WebSocket implementation globally available like [websockets/ws](https://github.com/websockets/ws).
 
 ```typescript
 const chatClient = new ChatClient({ projectId: "xxx-xxx-xxx-xxx-xxx" });

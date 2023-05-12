@@ -134,7 +134,7 @@ type ProviderConfig =
     };
 
 export type CompletionConfig = {
-  variables: Record<string, string>;
+  variables?: Record<string, string>;
   userId?: string;
   chatContext?: ChatContext;
   projectId?: string;
