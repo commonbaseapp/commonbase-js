@@ -14,7 +14,6 @@ interface CreateCompletionRequest
 
 interface CreatChatCompletionRequest
   extends originalOpenAI.CreateChatCompletionRequest {
-  variables?: Record<string, string>;
   projectId: string;
 }
 
@@ -38,7 +37,6 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
   ) {
     // return super.createChatCompletion(createChatCompletionRequest, options);
     const res = await this.cbClient.createCompletion({
-      variables: createChatCompletionRequest.variables || {},
       userId: createChatCompletionRequest.user,
       chatContext: {
         messages: createChatCompletionRequest.messages,
@@ -89,7 +87,6 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
     options?: AxiosRequestConfig,
   ) {
     const res = await this.cbClient.createCompletion({
-      variables: createCompletionRequest.variables || {},
       userId: createCompletionRequest.user,
       projectId: createCompletionRequest.projectId,
       prompt: createCompletionRequest.prompt?.toString(),

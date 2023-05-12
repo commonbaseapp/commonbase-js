@@ -79,10 +79,12 @@ export class Client {
       ...this.options._extraParams,
       projectId: config.projectId || this.options.projectId,
       apiKey: this.options.apiKey,
-      variables: {
-        ...this.options.defaultVariables,
-        ...config.variables,
-      },
+      variables: config.variables
+        ? {
+            ...this.options.defaultVariables,
+            ...config.variables,
+          }
+        : undefined,
       context: config.chatContext,
       userId: config.userId,
       truncateVariable:
