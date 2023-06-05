@@ -104,7 +104,7 @@ export type TruncationConfig = {
 
 type ProviderConfig =
   | {
-      provider: "openai";
+      provider: "openai" | "cb-openai-eu";
       params: {
         type: "chat" | "text";
         model?: string;
