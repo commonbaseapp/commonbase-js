@@ -1,6 +1,6 @@
 export class CompletionResult {
-  private readonly _rawResponse: APIResponse;
-  constructor(response: APIResponse) {
+  private readonly _rawResponse: CompletionResponse;
+  constructor(response: CompletionResponse) {
     this._rawResponse = response;
   }
 
@@ -23,7 +23,7 @@ export class CompletionResult {
     return this._rawResponse.completed;
   }
 
-  get _raw(): APIResponse {
+  get _raw(): CompletionResponse {
     return this._rawResponse;
   }
 }
@@ -62,7 +62,7 @@ export type ChatContext = {
   messages: ChatMessage[];
 };
 
-type APIResponseChoice = {
+type CompletionResponseChoice = {
   index: number;
   finish_reason: string;
   text: string;
@@ -78,14 +78,27 @@ type TruncationResult = {
   iterations: number;
 };
 
-export type APIResponse = {
+export type CompletionResponse = {
   completed: boolean;
   invocationId: string;
   projectId: string;
   type: string;
   model: string;
-  choices: APIResponseChoice[];
+  choices: CompletionResponseChoice[];
   variableTruncation?: TruncationResult;
+};
+
+export type EmbeddingsResponse = {
+  completed: boolean;
+  invocationId: string;
+  projectId: string;
+  type: string;
+  model: string;
+  data: {
+    object: "embedding";
+    index: number;
+    embedding: number[];
+  }[];
 };
 
 export type APIErrorResponse = {
@@ -102,36 +115,38 @@ export type TruncationConfig = {
   name?: string;
 };
 
-type ProviderConfig =
-  | {
-      provider: "openai" | "cb-openai-eu";
-      params: {
-        type: "chat" | "text";
-        model?: string;
-        temperature?: number;
-        top_p?: number;
-        max_tokens?: number;
-        n?: number;
-        frequency_penalty?: number;
-        presence_penalty?: number;
-        stop?: string[] | string;
-        best_of?: number;
-        suffix?: string;
-        logprobs?: number;
-      };
-    }
-  | {
-      provider: "anthropic";
-      params: {
-        type: "chat" | undefined;
-        model?: string;
-        max_tokens_to_sample?: number;
-        temperature?: number;
-        stop_sequences?: string[];
-        top_k?: number;
-        top_p?: number;
-      };
-    };
+type OpenAIProviderConfig = {
+  provider: "openai" | "cb-openai-eu";
+  params: {
+    type: "chat" | "text" | "embeddings";
+    model?: string;
+    temperature?: number;
+    top_p?: number;
+    max_tokens?: number;
+    n?: number;
+    frequency_penalty?: number;
+    presence_penalty?: number;
+    stop?: string[] | string;
+    best_of?: number;
+    suffix?: string;
+    logprobs?: number;
+  };
+};
+
+type AnthropicProviderConfig = {
+  provider: "anthropic";
+  params: {
+    type: "chat" | undefined;
+    model?: string;
+    max_tokens_to_sample?: number;
+    temperature?: number;
+    stop_sequences?: string[];
+    top_k?: number;
+    top_p?: number;
+  };
+};
+
+type ProviderConfig = OpenAIProviderConfig | AnthropicProviderConfig;
 
 export type CompletionConfig = {
   variables?: Record<string, string>;
@@ -140,5 +155,13 @@ export type CompletionConfig = {
   projectId?: string;
   truncateVariable?: TruncationConfig;
   prompt?: string;
+  providerConfig?: ProviderConfig;
+};
+
+export type EmbeddingsConfig = {
+  input: string;
+  projectId?: string;
+  apiKey?: string;
+  userId?: string;
   providerConfig?: ProviderConfig;
 };

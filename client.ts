@@ -1,10 +1,12 @@
 import { rootApiUrl } from "./constants";
 import {
   APIErrorResponse,
-  APIResponse,
   ClientOptions,
   CompletionConfig,
+  CompletionResponse,
   CompletionResult,
+  EmbeddingsConfig,
+  EmbeddingsResponse,
 } from "./types";
 
 class StreamConsumer {
@@ -41,7 +43,7 @@ class StreamConsumer {
     if (!line.startsWith("data: ")) {
       return this.next();
     }
-    let data: APIResponse;
+    let data: CompletionResponse;
     try {
       data = JSON.parse(line.slice(6));
     } catch (e) {
@@ -74,7 +76,7 @@ export class Client {
     this.apiUrl = this.options._apiUrl || rootApiUrl;
   }
 
-  private getBody(config: CompletionConfig) {
+  private getCompletionBody(config: CompletionConfig) {
     return {
       ...this.options._extraParams,
       projectId: config.projectId || this.options.projectId,
@@ -93,15 +95,25 @@ export class Client {
       providerConfig: config.providerConfig,
     };
   }
+  private getEmbeddingsBody(config: EmbeddingsConfig) {
+    return {
+      ...this.options._extraParams,
+      projectId: config.projectId || this.options.projectId,
+      apiKey: this.options.apiKey,
+      userId: config.userId,
+      input: config.input,
+      providerConfig: config.providerConfig,
+    };
+  }
   private async fetchAPI(
     path: string,
     config: CompletionConfig,
     stream = false,
-  ): Promise<APIResponse | StreamConsumer> {
+  ): Promise<CompletionResponse | EmbeddingsResponse | StreamConsumer> {
     const res = await fetch(`${this.apiUrl}/${path}`, {
       method: "POST",
       body: JSON.stringify({
-        ...this.getBody(config),
+        ...this.getCompletionBody(config),
         stream,
       }),
       headers: {
@@ -128,7 +140,7 @@ export class Client {
     const completionsRes = (await this.fetchAPI(
       "completions",
       config,
-    )) as APIResponse;
+    )) as CompletionResponse;
 
     return new CompletionResult(completionsRes);
   }
@@ -137,5 +149,23 @@ export class Client {
     config: CompletionConfig,
   ): Promise<StreamConsumer> {
     return (await this.fetchAPI("completions", config, true)) as StreamConsumer;
+  }
+
+  async createEmbedding(config: EmbeddingsConfig): Promise<EmbeddingsResponse> {
+    const res = await fetch(`${this.apiUrl}/embeddings`, {
+      method: "POST",
+      body: JSON.stringify(this.getEmbeddingsBody(config)),
+      headers: {
+        ...this.options._extraHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      },
+    });
+
+    if (!res.ok) {
+      const resBody = await res.json();
+      throw new APIError(res.status, resBody);
+    }
+
+    return (await res.json()) as EmbeddingsResponse;
   }
 }
