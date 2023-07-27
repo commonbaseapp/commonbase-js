@@ -43,10 +43,10 @@ const openai = new OpenAIApi(configuration);
 
 const completion = await openai.createCompletion({
   model: "text-davinci-003",
-  // when using the openai drop-in replacement, the prompt is passed to 
+  // when using the openai drop-in replacement, the prompt is passed to
   // the OpenAI API as-is and the prompt CMS + templating is not used
   prompt: "Hello World, my name is Alice!",
-  // you need to add your project id to be able to track 
+  // you need to add your project id to be able to track
   // the usage and responses of the OpenAI requests
   projectId: "xxx-xxx-xxx-xxx-xxx",
 });
