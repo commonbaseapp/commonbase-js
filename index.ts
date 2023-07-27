@@ -1,2 +1,1 @@
-export * from "./chat-client";
-export * from "./client";
+export { ChatClient, Client } from "./client";
