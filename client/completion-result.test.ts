@@ -49,5 +49,15 @@ describe("CompletionResult", () => {
 
   it("should return empty array if choices is empty", () => {
     expect(mockEmptyCompletionResult.choices.length).toBe(0);
+
+    const mockNullChoicesCompletionResult = new CompletionResult({
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      choices: null,
+    });
+
+    // Test null choices parameter.
+    expect(mockNullChoicesCompletionResult.choices).toBeInstanceOf(Array);
+    expect(mockNullChoicesCompletionResult.bestResult).toBe("");
   });
 });

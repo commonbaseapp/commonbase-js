@@ -16,7 +16,7 @@ export class CompletionResult {
       console.warn("CompletionResponse contains no choices.");
       return [];
     }
-    return this._rawResponse.choices.map((c) => c.text) ?? [];
+    return this._rawResponse.choices.map((c) => c.text);
   }
 
   get completed(): boolean {
