@@ -6,19 +6,17 @@ export class CompletionResult {
     this._rawResponse = response;
   }
 
-  private assertChoices() {
-    if (!this._rawResponse.choices?.length) {
-      throw new Error("no completions found");
-    }
-  }
   get bestResult(): string {
-    this.assertChoices();
-    return this._rawResponse.choices[0].text;
+    return this.choices[0] ?? "";
   }
 
   get choices(): string[] {
-    this.assertChoices();
-    return this._rawResponse.choices.map((c) => c.text);
+    if (!this._rawResponse.choices || this._rawResponse.choices.length === 0) {
+      // TODO: Check API to see why this occasionally happens.
+      console.warn("CompletionResponse contains no choices.");
+      return [];
+    }
+    return this._rawResponse.choices.map((c) => c.text) ?? [];
   }
 
   get completed(): boolean {
