@@ -1,4 +1,4 @@
-import { ChatClientOptions } from "./types";
+import type { ChatClientOptions } from "./types";
 
 const WEBSOCKET_URL = "wss://api.commonbase.com/chats";
 

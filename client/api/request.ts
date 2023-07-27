@@ -1,19 +1,15 @@
-import { ClientOptions, CompletionConfig, EmbeddingsConfig } from "../types";
+import type {
+  ClientOptions,
+  CompletionConfig,
+  EmbeddingsConfig,
+} from "../types";
 import { APIError } from "./error";
-import { getCompletionBody, getEmbeddingsBody } from "./request-util";
-
-export const ROOT_API_URL = "https://api.commonbase.com";
-
-function getUrl(path: string, options?: ClientOptions) {
-  return `${options?._apiUrl || ROOT_API_URL}/${path}`;
-}
-
-function getHeaders(options: ClientOptions) {
-  return {
-    ...options._extraHeaders,
-    "Content-Type": "application/json; charset=utf-8",
-  };
-}
+import {
+  getCompletionBody,
+  getEmbeddingsBody,
+  getHeaders,
+  getUrl,
+} from "./request-util";
 
 export async function fetchCompletionsAPI(
   config: CompletionConfig,

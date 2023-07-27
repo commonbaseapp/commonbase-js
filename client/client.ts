@@ -1,10 +1,10 @@
 import { fetchCompletionsAPI, fetchEmbeddingsAPI } from "./api/request";
+import { CompletionResult } from "./completion-result";
 import { StreamConsumer } from "./stream-consumer";
-import {
+import type {
   ClientOptions,
   CompletionConfig,
   CompletionResponse,
-  CompletionResult,
   EmbeddingsConfig,
   EmbeddingsResponse,
 } from "./types";

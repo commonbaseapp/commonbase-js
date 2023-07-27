@@ -1,4 +1,5 @@
-import { CompletionResponse, CompletionResult } from "./types";
+import { CompletionResult } from "./completion-result";
+import type { CompletionResponse } from "./types";
 
 export class StreamConsumer {
   private stream: ReadableStreamDefaultReader;
