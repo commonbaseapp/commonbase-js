@@ -12,7 +12,7 @@ import {
   getUrl,
 } from "./request-util";
 
-const MOCK_COMPLETION_CONFIG: Required<CompletionConfig> = {
+const mockCompletionConfig: Required<CompletionConfig> = {
   projectId: "projectId",
   userId: "userId",
   prompt: "prompt",
@@ -37,7 +37,7 @@ const MOCK_COMPLETION_CONFIG: Required<CompletionConfig> = {
   },
 };
 
-const MOCK_EMBEDDINGS_CONFIG: Required<EmbeddingsConfig> = {
+const mockEmbeddingsConfig: Required<EmbeddingsConfig> = {
   projectId: "projectId",
   userId: "userId",
   input: "input",
@@ -50,7 +50,7 @@ const MOCK_EMBEDDINGS_CONFIG: Required<EmbeddingsConfig> = {
 };
 
 type MockClientOptionsConfig = Required<ClientOptions>;
-const MOCK_CLIENT_OPTIONS: MockClientOptionsConfig = {
+const mockClientOptions: MockClientOptionsConfig = {
   projectId: "newProjectIdFromOptions",
   apiKey: "apiKeyFromOptions",
   defaultVariables: {
@@ -74,27 +74,27 @@ const MOCK_CLIENT_OPTIONS: MockClientOptionsConfig = {
 
 describe("getCompletionBody", () => {
   it("formats body properly from config", () => {
-    const body = getCompletionBody(MOCK_COMPLETION_CONFIG, {});
+    const body = getCompletionBody(mockCompletionConfig, {});
 
     expect(body).toEqual({
-      projectId: MOCK_COMPLETION_CONFIG.projectId,
-      userId: MOCK_COMPLETION_CONFIG.userId,
-      prompt: MOCK_COMPLETION_CONFIG.prompt,
-      context: MOCK_COMPLETION_CONFIG.chatContext,
-      variables: MOCK_COMPLETION_CONFIG.variables,
-      truncateVariable: MOCK_COMPLETION_CONFIG.truncateVariable,
-      providerConfig: MOCK_COMPLETION_CONFIG.providerConfig,
+      projectId: mockCompletionConfig.projectId,
+      userId: mockCompletionConfig.userId,
+      prompt: mockCompletionConfig.prompt,
+      context: mockCompletionConfig.chatContext,
+      variables: mockCompletionConfig.variables,
+      truncateVariable: mockCompletionConfig.truncateVariable,
+      providerConfig: mockCompletionConfig.providerConfig,
     });
   });
 
   it("should apply default config from client options.", () => {
-    const body = getCompletionBody({}, MOCK_CLIENT_OPTIONS);
+    const body = getCompletionBody({}, mockClientOptions);
 
     expect(body).toEqual({
-      projectId: MOCK_CLIENT_OPTIONS.projectId,
-      apiKey: MOCK_CLIENT_OPTIONS.apiKey,
-      truncateVariable: MOCK_CLIENT_OPTIONS.defaultTruncateVariableConfig,
-      ...MOCK_CLIENT_OPTIONS._extraParams,
+      projectId: mockClientOptions.projectId,
+      apiKey: mockClientOptions.apiKey,
+      truncateVariable: mockClientOptions.defaultTruncateVariableConfig,
+      ...mockClientOptions._extraParams,
     });
 
     // If 'variables' is not set in the config, then the client's
@@ -103,59 +103,59 @@ describe("getCompletionBody", () => {
   });
 
   it("should overwrite/merge client options default with config", () => {
-    const body = getCompletionBody(MOCK_COMPLETION_CONFIG, MOCK_CLIENT_OPTIONS);
+    const body = getCompletionBody(mockCompletionConfig, mockClientOptions);
 
     expect(body).toEqual({
-      projectId: MOCK_COMPLETION_CONFIG.projectId,
-      userId: MOCK_COMPLETION_CONFIG.userId,
-      apiKey: MOCK_CLIENT_OPTIONS.apiKey,
-      prompt: MOCK_COMPLETION_CONFIG.prompt,
-      context: MOCK_COMPLETION_CONFIG.chatContext,
-      truncateVariable: MOCK_COMPLETION_CONFIG.truncateVariable,
+      projectId: mockCompletionConfig.projectId,
+      userId: mockCompletionConfig.userId,
+      apiKey: mockClientOptions.apiKey,
+      prompt: mockCompletionConfig.prompt,
+      context: mockCompletionConfig.chatContext,
+      truncateVariable: mockCompletionConfig.truncateVariable,
       variables: {
-        ...MOCK_CLIENT_OPTIONS.defaultVariables,
-        ...MOCK_COMPLETION_CONFIG.variables,
+        ...mockClientOptions.defaultVariables,
+        ...mockCompletionConfig.variables,
       },
-      providerConfig: MOCK_COMPLETION_CONFIG.providerConfig,
-      ...MOCK_CLIENT_OPTIONS._extraParams,
+      providerConfig: mockCompletionConfig.providerConfig,
+      ...mockClientOptions._extraParams,
     });
   });
 });
 
 describe("getEmbeddingsBody", () => {
   it("formats body properly from config", () => {
-    const body = getEmbeddingsBody(MOCK_EMBEDDINGS_CONFIG, {});
+    const body = getEmbeddingsBody(mockEmbeddingsConfig, {});
 
     expect(body).toEqual({
-      projectId: MOCK_EMBEDDINGS_CONFIG.projectId,
-      userId: MOCK_EMBEDDINGS_CONFIG.userId,
-      input: MOCK_EMBEDDINGS_CONFIG.input,
-      providerConfig: MOCK_EMBEDDINGS_CONFIG.providerConfig,
+      projectId: mockEmbeddingsConfig.projectId,
+      userId: mockEmbeddingsConfig.userId,
+      input: mockEmbeddingsConfig.input,
+      providerConfig: mockEmbeddingsConfig.providerConfig,
     });
   });
 
   it("should apply default config from client options.", () => {
     const config: EmbeddingsConfig = { input: "input" };
-    const body = getEmbeddingsBody(config, MOCK_CLIENT_OPTIONS);
+    const body = getEmbeddingsBody(config, mockClientOptions);
 
     expect(body).toEqual({
       ...config,
-      projectId: MOCK_CLIENT_OPTIONS.projectId,
-      apiKey: MOCK_CLIENT_OPTIONS.apiKey,
-      ...MOCK_CLIENT_OPTIONS._extraParams,
+      projectId: mockClientOptions.projectId,
+      apiKey: mockClientOptions.apiKey,
+      ...mockClientOptions._extraParams,
     });
   });
 
   it("should overwrite/merge client options default with config", () => {
-    const body = getEmbeddingsBody(MOCK_EMBEDDINGS_CONFIG, MOCK_CLIENT_OPTIONS);
+    const body = getEmbeddingsBody(mockEmbeddingsConfig, mockClientOptions);
 
     expect(body).toEqual({
-      projectId: MOCK_EMBEDDINGS_CONFIG.projectId,
-      apiKey: MOCK_CLIENT_OPTIONS.apiKey,
-      userId: MOCK_EMBEDDINGS_CONFIG.userId,
-      input: MOCK_EMBEDDINGS_CONFIG.input,
-      providerConfig: MOCK_EMBEDDINGS_CONFIG.providerConfig,
-      ...MOCK_CLIENT_OPTIONS._extraParams,
+      projectId: mockEmbeddingsConfig.projectId,
+      apiKey: mockClientOptions.apiKey,
+      userId: mockEmbeddingsConfig.userId,
+      input: mockEmbeddingsConfig.input,
+      providerConfig: mockEmbeddingsConfig.providerConfig,
+      ...mockClientOptions._extraParams,
     });
   });
 });
@@ -166,8 +166,8 @@ describe("getUrl", () => {
   });
 
   it("should use _apiUrl from ClientOptions", () => {
-    expect(getUrl("test-path", MOCK_CLIENT_OPTIONS)).toBe(
-      `${MOCK_CLIENT_OPTIONS._apiUrl}/test-path`,
+    expect(getUrl("test-path", mockClientOptions)).toBe(
+      `${mockClientOptions._apiUrl}/test-path`,
     );
   });
 });
@@ -180,8 +180,8 @@ describe("getHeaders", () => {
   });
 
   it("should add _extraHeaders from ClientOptions", () => {
-    expect(getHeaders(MOCK_CLIENT_OPTIONS)).toEqual({
-      ...MOCK_CLIENT_OPTIONS._extraHeaders,
+    expect(getHeaders(mockClientOptions)).toEqual({
+      ...mockClientOptions._extraHeaders,
       "Content-Type": "application/json; charset=utf-8",
     });
   });
