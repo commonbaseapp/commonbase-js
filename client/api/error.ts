@@ -1,4 +1,4 @@
-import { APIErrorResponse } from "../types";
+import type { APIErrorResponse } from "../types";
 
 export class APIError extends Error {
   public readonly errorResponse: APIErrorResponse;
