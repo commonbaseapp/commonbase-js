@@ -1,3 +1,4 @@
+import { version } from "../../package.json";
 import type {
   ClientOptions,
   CompletionConfig,
@@ -13,6 +14,7 @@ export function getUrl(path: string, options?: ClientOptions) {
 export function getHeaders(options: ClientOptions) {
   return {
     ...options._extraHeaders,
+    "User-Agent": `commonbase-js/${version}`,
     "Content-Type": "application/json; charset=utf-8",
   };
 }
