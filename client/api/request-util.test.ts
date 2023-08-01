@@ -176,6 +176,7 @@ describe("getHeaders", () => {
   it("should always add json Content-Type header", () => {
     expect(getHeaders({})).toEqual({
       "Content-Type": "application/json; charset=utf-8",
+      "User-Agent": "commonbase-js/0.0.0",
     });
   });
 
@@ -183,6 +184,7 @@ describe("getHeaders", () => {
     expect(getHeaders(mockClientOptions)).toEqual({
       ...mockClientOptions._extraHeaders,
       "Content-Type": "application/json; charset=utf-8",
+      "User-Agent": "commonbase-js/0.0.0",
     });
   });
 });
