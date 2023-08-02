@@ -16,7 +16,7 @@ export async function fetchCompletionsAPI(
   options: ClientOptions,
   stream = false,
 ): Promise<Response> {
-  const res = await fetch(getUrl("completions", options), {
+  const res = await fetch(getUrl("completions"), {
     method: "POST",
     body: JSON.stringify({
       ...getCompletionBody(config, options),
@@ -37,7 +37,7 @@ export async function fetchEmbeddingsAPI(
   config: EmbeddingsConfig,
   options: ClientOptions,
 ): Promise<Response> {
-  const res = await fetch(getUrl("embeddings", options), {
+  const res = await fetch(getUrl("embeddings"), {
     method: "POST",
     body: JSON.stringify(getEmbeddingsBody(config, options)),
     headers: getHeaders(options),

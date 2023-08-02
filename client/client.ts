@@ -11,12 +11,16 @@ import type {
 
 export class Client {
   private options: ClientOptions;
-  constructor(options?: ClientOptions) {
-    this.options = options || {};
+  constructor(options: ClientOptions) {
+    if (!options?.apiKey || options.apiKey.trim().length === 0) {
+      throw Error("A Commonbase API Key is required for all requests.");
+    }
+
+    this.options = options;
   }
 
   async createCompletion(config: CompletionConfig): Promise<CompletionResult> {
-    const completionsRes = await fetchCompletionsAPI(this.options, config);
+    const completionsRes = await fetchCompletionsAPI(config, this.options);
 
     return new CompletionResult(
       (await completionsRes.json()) as CompletionResponse,

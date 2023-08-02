@@ -7,13 +7,13 @@ import type {
 
 const ROOT_API_URL = "https://api.commonbase.com";
 
-export function getUrl(path: string, options?: ClientOptions) {
-  return `${options?._apiUrl || ROOT_API_URL}/${path}`;
+export function getUrl(path: string) {
+  return `${ROOT_API_URL}/${path}`;
 }
 
 export function getHeaders(options: ClientOptions) {
   return {
-    ...options._extraHeaders,
+    Authorization: options.apiKey,
     "User-Agent": `commonbase-js/${version}`,
     "Content-Type": "application/json; charset=utf-8",
   };
@@ -24,19 +24,11 @@ export function getCompletionBody(
   options: ClientOptions,
 ) {
   return {
-    ...options._extraParams,
     projectId: config.projectId ?? options.projectId,
-    apiKey: options.apiKey,
-    variables: config.variables
-      ? {
-          ...options.defaultVariables,
-          ...config.variables,
-        }
-      : undefined,
+    variables: config.variables ? config.variables : undefined,
     context: config.chatContext,
     userId: config.userId,
-    truncateVariable:
-      config.truncateVariable ?? options.defaultTruncateVariableConfig,
+    truncateVariable: config.truncateVariable,
     prompt: config.prompt,
     providerConfig: config.providerConfig,
   };
@@ -47,9 +39,7 @@ export function getEmbeddingsBody(
   options: ClientOptions,
 ) {
   return {
-    ...options._extraParams,
     projectId: config.projectId ?? options.projectId,
-    apiKey: options.apiKey,
     userId: config.userId,
     input: config.input,
     providerConfig: config.providerConfig,

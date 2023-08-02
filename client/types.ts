@@ -1,11 +1,6 @@
 export type ClientOptions = {
+  apiKey: string;
   projectId?: string;
-  apiKey?: string;
-  defaultVariables?: Record<string, string>;
-  defaultTruncateVariableConfig?: TruncationConfig;
-  _apiUrl?: string;
-  _extraHeaders?: Record<string, string>;
-  _extraParams?: Record<string, string | number | boolean>;
 };
 
 type IsNode = typeof globalThis extends { process: unknown } ? true : false;

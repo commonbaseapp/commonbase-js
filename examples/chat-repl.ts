@@ -3,6 +3,7 @@ import * as readline from "node:readline/promises";
 
 // import { Client } from "@commonbase/sdk";
 import { Client } from "../index";
+import { ChatContext } from "../client/types";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -10,15 +11,20 @@ const rl = readline.createInterface({
 });
 
 const client = new Client({
+  apiKey: process.env.CB_API_KEY!,
   projectId: process.env.CB_PROJECT_ID,
 });
 
-async function askQuestion(question: string) {
+async function askQuestion(context: ChatContext) {
   return client.createStreamingCompletion({
-    variables: {},
+    prompt: "You are a demo chatbot.",
+    chatContext: context,
     userId: "anonymous-example-user",
-    chatContext: {
-      messages: [{ role: "user", content: question }],
+    providerConfig: {
+      provider: "cb-openai-eu",
+      params: {
+        type: "chat",
+      },
     },
   });
 }
@@ -27,6 +33,11 @@ async function main() {
   console.log("Welcome to the Commonbase chat assistant!");
   console.log("Type your question and press enter to send it.");
   console.log("Type 'exit' or 'quit' to quit.");
+
+  const context: ChatContext = {
+    messages: [],
+  };
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const question = (await rl.question("> ")).trim();
@@ -37,10 +48,18 @@ async function main() {
       console.log("Type your question and press enter to send it.");
       continue;
     }
-    const completionStream = await askQuestion(question);
+    context.messages.push({
+      role: "user",
+      content: question,
+    });
+    const completionStream = await askQuestion(context);
     for await (const completionResult of completionStream) {
       if (completionResult.completed) {
         process.stdout.write("\n\n");
+        context.messages.push({
+          role: "assistant",
+          content: completionResult.bestResult,
+        });
         continue;
       }
       process.stdout.write(completionResult.bestResult);
