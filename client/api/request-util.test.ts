@@ -31,6 +31,7 @@ const mockCompletionConfig: Required<CompletionConfig> = {
   },
   providerConfig: {
     provider: "openai",
+    apiKey: "openaiApiKey",
     params: {
       type: "chat",
     },
@@ -43,6 +44,7 @@ const mockEmbeddingsConfig: Required<EmbeddingsConfig> = {
   input: "input",
   providerConfig: {
     provider: "openai",
+    apiKey: "openaiApiKey",
     params: {
       type: "embeddings",
     },
@@ -66,7 +68,10 @@ describe("getCompletionBody", () => {
       context: mockCompletionConfig.chatContext,
       variables: mockCompletionConfig.variables,
       truncateVariable: mockCompletionConfig.truncateVariable,
-      providerConfig: mockCompletionConfig.providerConfig,
+      providerConfig: {
+        ...mockCompletionConfig.providerConfig,
+        apiKey: undefined,
+      },
     });
   });
 
@@ -92,7 +97,10 @@ describe("getCompletionBody", () => {
       context: mockCompletionConfig.chatContext,
       truncateVariable: mockCompletionConfig.truncateVariable,
       variables: mockCompletionConfig.variables,
-      providerConfig: mockCompletionConfig.providerConfig,
+      providerConfig: {
+        ...mockCompletionConfig.providerConfig,
+        apiKey: undefined,
+      },
     });
   });
 });
@@ -105,7 +113,10 @@ describe("getEmbeddingsBody", () => {
       projectId: mockEmbeddingsConfig.projectId,
       userId: mockEmbeddingsConfig.userId,
       input: mockEmbeddingsConfig.input,
-      providerConfig: mockEmbeddingsConfig.providerConfig,
+      providerConfig: {
+        ...mockEmbeddingsConfig.providerConfig,
+        apiKey: undefined,
+      },
     });
   });
 
@@ -126,7 +137,10 @@ describe("getEmbeddingsBody", () => {
       projectId: mockEmbeddingsConfig.projectId,
       userId: mockEmbeddingsConfig.userId,
       input: mockEmbeddingsConfig.input,
-      providerConfig: mockEmbeddingsConfig.providerConfig,
+      providerConfig: {
+        ...mockEmbeddingsConfig.providerConfig,
+        apiKey: undefined,
+      },
     });
   });
 });
@@ -139,8 +153,9 @@ describe("getUrl", () => {
 
 describe("getHeaders", () => {
   it("should add json Content-Type and Authorization header", () => {
-    expect(getHeaders({ apiKey: "apiKey" })).toEqual({
+    expect(getHeaders({ apiKey: "apiKey" }, mockCompletionConfig)).toEqual({
       Authorization: "apiKey",
+      "Provider-API-Key": mockCompletionConfig.providerConfig.apiKey,
       "Content-Type": "application/json; charset=utf-8",
       "User-Agent": "commonbase-js/0.0.0",
     });

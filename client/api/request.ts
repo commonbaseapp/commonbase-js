@@ -22,7 +22,7 @@ export async function fetchCompletionsAPI(
       ...getCompletionBody(config, options),
       stream,
     }),
-    headers: getHeaders(options),
+    headers: getHeaders(options, config),
   });
 
   if (!res.ok) {
@@ -40,7 +40,7 @@ export async function fetchEmbeddingsAPI(
   const res = await fetch(getUrl("embeddings"), {
     method: "POST",
     body: JSON.stringify(getEmbeddingsBody(config, options)),
-    headers: getHeaders(options),
+    headers: getHeaders(options, config),
   });
 
   if (!res.ok) {
