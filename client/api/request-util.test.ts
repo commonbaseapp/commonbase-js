@@ -29,9 +29,9 @@ const mockCompletionConfig: Required<CompletionConfig> = {
     maxPromptTokens: 1,
     name: "name",
   },
+  providerApiKey: "openaiApiKey",
   providerConfig: {
     provider: "openai",
-    apiKey: "openaiApiKey",
     params: {
       type: "chat",
     },
@@ -42,9 +42,9 @@ const mockEmbeddingsConfig: Required<EmbeddingsConfig> = {
   projectId: "projectId",
   userId: "userId",
   input: "input",
+  providerApiKey: "openaiApiKey",
   providerConfig: {
     provider: "openai",
-    apiKey: "openaiApiKey",
     params: {
       type: "embeddings",
     },
@@ -155,7 +155,7 @@ describe("getHeaders", () => {
   it("should add json Content-Type and Authorization header", () => {
     expect(getHeaders({ apiKey: "apiKey" }, mockCompletionConfig)).toEqual({
       Authorization: "apiKey",
-      "Provider-API-Key": mockCompletionConfig.providerConfig.apiKey,
+      "Provider-API-Key": mockCompletionConfig.providerApiKey,
       "Content-Type": "application/json; charset=utf-8",
       "User-Agent": "commonbase-js/0.0.0",
     });

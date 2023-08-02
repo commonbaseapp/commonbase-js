@@ -3,7 +3,6 @@ import type {
   ClientOptions,
   CompletionConfig,
   EmbeddingsConfig,
-  ProviderConfig,
   RequestConfig,
 } from "../types";
 
@@ -19,20 +18,10 @@ export function getHeaders(options: ClientOptions, config: RequestConfig) {
     "User-Agent": `commonbase-js/${version}`,
     "Content-Type": "application/json; charset=utf-8",
   };
-  if (typeof config.providerConfig?.apiKey === "string") {
-    headers["Provider-API-Key"] = config.providerConfig.apiKey;
+  if (typeof config.providerApiKey === "string") {
+    headers["Provider-API-Key"] = config.providerApiKey;
   }
   return headers;
-}
-
-function removeApiKeyFromProviderConfig(
-  config?: ProviderConfig,
-): Omit<ProviderConfig, "apiKey"> | undefined {
-  const providerConfig = config && {
-    ...config,
-  };
-  delete providerConfig?.apiKey;
-  return providerConfig;
 }
 
 export function getCompletionBody(
@@ -46,7 +35,7 @@ export function getCompletionBody(
     userId: config.userId,
     truncateVariable: config.truncateVariable,
     prompt: config.prompt,
-    providerConfig: removeApiKeyFromProviderConfig(config.providerConfig),
+    providerConfig: config.providerConfig,
   };
 }
 
@@ -58,6 +47,6 @@ export function getEmbeddingsBody(
     projectId: config.projectId ?? options.projectId,
     userId: config.userId,
     input: config.input,
-    providerConfig: removeApiKeyFromProviderConfig(config.providerConfig),
+    providerConfig: config.providerConfig,
   };
 }
