@@ -31,6 +31,7 @@ const mockCompletionConfig: Required<CompletionConfig> = {
   },
   providerConfig: {
     provider: "openai",
+    apiKey: "openaiApiKey",
     params: {
       type: "chat",
     },
@@ -43,6 +44,7 @@ const mockEmbeddingsConfig: Required<EmbeddingsConfig> = {
   input: "input",
   providerConfig: {
     provider: "openai",
+    apiKey: "openaiApiKey",
     params: {
       type: "embeddings",
     },
@@ -53,28 +55,11 @@ type MockClientOptionsConfig = Required<ClientOptions>;
 const mockClientOptions: MockClientOptionsConfig = {
   projectId: "newProjectIdFromOptions",
   apiKey: "apiKeyFromOptions",
-  defaultVariables: {
-    default1: "987",
-    default2: "zyx",
-  },
-  defaultTruncateVariableConfig: {
-    strategy: "off",
-    granularity: "line",
-    maxPromptTokens: 2,
-    name: "from default client options",
-  },
-  _extraParams: {
-    extraParam1: "extraParam",
-  },
-  _apiUrl: "https://new_api_url/",
-  _extraHeaders: {
-    extraHeader: "extraHeaderValue",
-  },
 };
 
 describe("getCompletionBody", () => {
   it("formats body properly from config", () => {
-    const body = getCompletionBody(mockCompletionConfig, {});
+    const body = getCompletionBody(mockCompletionConfig, { apiKey: "apiKey" });
 
     expect(body).toEqual({
       projectId: mockCompletionConfig.projectId,
@@ -83,7 +68,10 @@ describe("getCompletionBody", () => {
       context: mockCompletionConfig.chatContext,
       variables: mockCompletionConfig.variables,
       truncateVariable: mockCompletionConfig.truncateVariable,
-      providerConfig: mockCompletionConfig.providerConfig,
+      providerConfig: {
+        ...mockCompletionConfig.providerConfig,
+        apiKey: undefined,
+      },
     });
   });
 
@@ -92,9 +80,6 @@ describe("getCompletionBody", () => {
 
     expect(body).toEqual({
       projectId: mockClientOptions.projectId,
-      apiKey: mockClientOptions.apiKey,
-      truncateVariable: mockClientOptions.defaultTruncateVariableConfig,
-      ...mockClientOptions._extraParams,
     });
 
     // If 'variables' is not set in the config, then the client's
@@ -108,29 +93,30 @@ describe("getCompletionBody", () => {
     expect(body).toEqual({
       projectId: mockCompletionConfig.projectId,
       userId: mockCompletionConfig.userId,
-      apiKey: mockClientOptions.apiKey,
       prompt: mockCompletionConfig.prompt,
       context: mockCompletionConfig.chatContext,
       truncateVariable: mockCompletionConfig.truncateVariable,
-      variables: {
-        ...mockClientOptions.defaultVariables,
-        ...mockCompletionConfig.variables,
+      variables: mockCompletionConfig.variables,
+      providerConfig: {
+        ...mockCompletionConfig.providerConfig,
+        apiKey: undefined,
       },
-      providerConfig: mockCompletionConfig.providerConfig,
-      ...mockClientOptions._extraParams,
     });
   });
 });
 
 describe("getEmbeddingsBody", () => {
   it("formats body properly from config", () => {
-    const body = getEmbeddingsBody(mockEmbeddingsConfig, {});
+    const body = getEmbeddingsBody(mockEmbeddingsConfig, { apiKey: "apiKey" });
 
     expect(body).toEqual({
       projectId: mockEmbeddingsConfig.projectId,
       userId: mockEmbeddingsConfig.userId,
       input: mockEmbeddingsConfig.input,
-      providerConfig: mockEmbeddingsConfig.providerConfig,
+      providerConfig: {
+        ...mockEmbeddingsConfig.providerConfig,
+        apiKey: undefined,
+      },
     });
   });
 
@@ -141,8 +127,6 @@ describe("getEmbeddingsBody", () => {
     expect(body).toEqual({
       ...config,
       projectId: mockClientOptions.projectId,
-      apiKey: mockClientOptions.apiKey,
-      ...mockClientOptions._extraParams,
     });
   });
 
@@ -151,38 +135,27 @@ describe("getEmbeddingsBody", () => {
 
     expect(body).toEqual({
       projectId: mockEmbeddingsConfig.projectId,
-      apiKey: mockClientOptions.apiKey,
       userId: mockEmbeddingsConfig.userId,
       input: mockEmbeddingsConfig.input,
-      providerConfig: mockEmbeddingsConfig.providerConfig,
-      ...mockClientOptions._extraParams,
+      providerConfig: {
+        ...mockEmbeddingsConfig.providerConfig,
+        apiKey: undefined,
+      },
     });
   });
 });
 
 describe("getUrl", () => {
-  it("should format url properly by default", () => {
+  it("should format url properly", () => {
     expect(getUrl("test-path")).toBe("https://api.commonbase.com/test-path");
-  });
-
-  it("should use _apiUrl from ClientOptions", () => {
-    expect(getUrl("test-path", mockClientOptions)).toBe(
-      `${mockClientOptions._apiUrl}/test-path`,
-    );
   });
 });
 
 describe("getHeaders", () => {
-  it("should always add json Content-Type header", () => {
-    expect(getHeaders({})).toEqual({
-      "Content-Type": "application/json; charset=utf-8",
-      "User-Agent": "commonbase-js/0.0.0",
-    });
-  });
-
-  it("should add _extraHeaders from ClientOptions", () => {
-    expect(getHeaders(mockClientOptions)).toEqual({
-      ...mockClientOptions._extraHeaders,
+  it("should add json Content-Type and Authorization header", () => {
+    expect(getHeaders({ apiKey: "apiKey" }, mockCompletionConfig)).toEqual({
+      Authorization: "apiKey",
+      "Provider-API-Key": mockCompletionConfig.providerConfig.apiKey,
       "Content-Type": "application/json; charset=utf-8",
       "User-Agent": "commonbase-js/0.0.0",
     });

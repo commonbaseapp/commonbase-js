@@ -5,6 +5,7 @@ import { Client } from "../index";
 
 async function main() {
   const client = new Client({
+    apiKey: process.env.CB_API_KEY!,
     projectId: process.env.CB_PROJECT_ID,
   });
   const completionStream = await client.createStreamingCompletion({

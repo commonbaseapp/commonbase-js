@@ -3,11 +3,16 @@ import { describe, expect, it, vi } from "vitest";
 import { Client } from "./client";
 import { CompletionResult } from "./completion-result";
 import { StreamConsumer } from "./stream-consumer";
+import { ClientOptions } from "./types";
 
 const { mockFetchCompletions, mockFetchEmbeddings } = vi.hoisted(() => ({
   mockFetchCompletions: vi.fn(),
   mockFetchEmbeddings: vi.fn(),
 }));
+
+const mockClientOptions: ClientOptions = {
+  apiKey: "mockApiKey",
+};
 
 vi.mock("./api/request", () => ({
   fetchCompletionsAPI: mockFetchCompletions,
@@ -15,29 +20,40 @@ vi.mock("./api/request", () => ({
 }));
 
 describe("Client", () => {
+  it("should throw an error on missing API Key", () => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    expect(() => new Client()).throws(
+      "A Commonbase API Key is required for all requests.",
+    );
+    expect(() => new Client({ apiKey: "  " })).throws(
+      "A Commonbase API Key is required for all requests.",
+    );
+  });
+
   it("should return a CompletionResult from createCompletion", () => {
     mockFetchCompletions.mockReturnValueOnce(
       Promise.resolve(new Response("{}")),
     );
-    expect(new Client().createCompletion({})).resolves.toBeInstanceOf(
-      CompletionResult,
-    );
+    expect(
+      new Client(mockClientOptions).createCompletion({}),
+    ).resolves.toBeInstanceOf(CompletionResult);
   });
 
   it("should return a StreamConsumer from createStreamingCompletion", () => {
     mockFetchCompletions.mockReturnValueOnce(
       Promise.resolve(new Response("{}")),
     );
-    expect(new Client().createStreamingCompletion({})).resolves.toBeInstanceOf(
-      StreamConsumer,
-    );
+    expect(
+      new Client(mockClientOptions).createStreamingCompletion({}),
+    ).resolves.toBeInstanceOf(StreamConsumer);
   });
 
   it("should throw error on empty body from createStreamingCompletion", () => {
     mockFetchCompletions.mockReturnValueOnce(Promise.resolve(new Response()));
-    expect(new Client().createStreamingCompletion({})).rejects.toEqual(
-      new Error("no stream body"),
-    );
+    expect(
+      new Client(mockClientOptions).createStreamingCompletion({}),
+    ).rejects.toEqual(new Error("no stream body"));
   });
 
   it("should return response body json from createEmbedding", () => {
@@ -47,8 +63,8 @@ describe("Client", () => {
     mockFetchEmbeddings.mockReturnValueOnce(
       Promise.resolve(new Response(JSON.stringify(mockResponse))),
     );
-    expect(new Client().createEmbedding({ input: "" })).resolves.toEqual(
-      mockResponse,
-    );
+    expect(
+      new Client(mockClientOptions).createEmbedding({ input: "" }),
+    ).resolves.toEqual(mockResponse);
   });
 });

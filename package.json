@@ -23,7 +23,7 @@
   },
   "scripts": {
     "build": "tsc && cp package.json README.md ./dist/",
-    "test": "vitest",
+    "test": "eslint . && vitest",
     "coverage": "vitest run --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix --ext .tsx,.ts,.json",

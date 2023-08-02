@@ -1,11 +1,6 @@
 export type ClientOptions = {
+  apiKey: string;
   projectId?: string;
-  apiKey?: string;
-  defaultVariables?: Record<string, string>;
-  defaultTruncateVariableConfig?: TruncationConfig;
-  _apiUrl?: string;
-  _extraHeaders?: Record<string, string>;
-  _extraParams?: Record<string, string | number | boolean>;
 };
 
 type IsNode = typeof globalThis extends { process: unknown } ? true : false;
@@ -87,6 +82,7 @@ export type TruncationConfig = {
 
 type OpenAIProviderConfig = {
   provider: "openai" | "cb-openai-eu";
+  apiKey?: string;
   params: {
     type: "chat" | "text" | "embeddings";
     model?: string;
@@ -105,6 +101,7 @@ type OpenAIProviderConfig = {
 
 type AnthropicProviderConfig = {
   provider: "anthropic";
+  apiKey?: string;
   params: {
     type: "chat" | undefined;
     model?: string;
@@ -116,21 +113,21 @@ type AnthropicProviderConfig = {
   };
 };
 
-type ProviderConfig = OpenAIProviderConfig | AnthropicProviderConfig;
+export type ProviderConfig = OpenAIProviderConfig | AnthropicProviderConfig;
 
-export type CompletionConfig = {
-  variables?: Record<string, string>;
-  userId?: string;
-  chatContext?: ChatContext;
+export interface RequestConfig {
   projectId?: string;
+  userId?: string;
+  providerConfig?: ProviderConfig;
+}
+
+export interface CompletionConfig extends RequestConfig {
+  variables?: Record<string, string>;
+  chatContext?: ChatContext;
   truncateVariable?: TruncationConfig;
   prompt?: string;
-  providerConfig?: ProviderConfig;
-};
+}
 
-export type EmbeddingsConfig = {
+export interface EmbeddingsConfig extends RequestConfig {
   input: string;
-  projectId?: string;
-  userId?: string;
-  providerConfig?: ProviderConfig;
-};
+}

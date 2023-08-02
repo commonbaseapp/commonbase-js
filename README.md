@@ -10,72 +10,38 @@ feedback from the users and helps you fine-tune models for your specific use cas
 
 ## Installation
 
+Install [Commonbase from npm](https://www.npmjs.com/package/@commonbase/sdk) using your
+preferred package manager:
+
 ```bash
-$ npm install @commonbase/sdk
+npm add @commonbase/sdk
+pnpm add @commonbase/sdk
+yarn add @commonbase/sdk
 ```
 
 ## Usage
+
+A Project ID and API Key are required for all Commonbase requests. You can find your project ID
+and generate an API key in the [Commonbase Dashboard](https://commonbase.com/).
+
+To create a completion, configure a `Client` with your API Key and provide your Project ID
+and prompt to `createCompletion`.
 
 ```typescript
 import { Client } from "@commonbase/sdk";
 
 const client = new Client({
-  projectId: "xxx-xxx-xxx-xxx-xxx",
+  apiKey: "API_KEY",
 });
 
-const completionResult = await client.createCompletion({
-  variables: {
-    user: "Alice",
-  },
+const completion = await client.createCompletion({
+  projectId: "PROJECT_ID",
+  prompt: "Hello",
 });
 
-console.log(completionResult.bestResult);
+console.log(completion.bestResult);
 ```
 
-### Drop-in replacement for OpenAI API
+To stream a completion as it is generated, use `createStreamingCompletion`.
 
-```typescript
-// the openai package can be replaced with the @commonbase/sdk/openai package
-// import { Configuration, OpenAIApi } from "openai";
-import { Configuration, OpenAIApi } from "@commonbase/sdk/openai";
-
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
-
-const completion = await openai.createCompletion({
-  model: "text-davinci-003",
-  // when using the openai drop-in replacement, the prompt is passed to
-  // the OpenAI API as-is and the prompt CMS + templating is not used
-  prompt: "Hello World, my name is Alice!",
-  // you need to add your project id to be able to track
-  // the usage and responses of the OpenAI requests
-  projectId: "xxx-xxx-xxx-xxx-xxx",
-});
-console.log(completion.data.choices[0].text);
-```
-
-### Chat
-
-The Chat API is dependent on the [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) API, if you are intending to use it from a Node (or other) environment you have to make a compatible WebSocket implementation globally available like [websockets/ws](https://github.com/websockets/ws).
-
-```typescript
-const chatClient = new ChatClient({ projectId: "xxx-xxx-xxx-xxx-xxx" });
-const stream = chatClient.send("Hey Bot");
-while (true) {
-  const { done, value } = await stream.next();
-  if (done) {
-    break;
-  }
-  console.log(value);
-}
-```
-
-In browsers that support [async iteration of streams](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream#async_iteration) (currently only Firefox), you can just iterate over the stream
-
-```typescript
-for await (const chunk of stream) {
-  console.log(chunk);
-}
-```
+For more examples, see [/examples](https://github.com/commonbaseapp/sdk/tree/main/examples).
