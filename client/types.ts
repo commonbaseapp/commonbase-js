@@ -82,7 +82,6 @@ export type TruncationConfig = {
 
 type OpenAIProviderConfig = {
   provider: "openai" | "cb-openai-eu";
-  apiKey?: string;
   params: {
     type: "chat" | "text" | "embeddings";
     model?: string;
@@ -101,7 +100,6 @@ type OpenAIProviderConfig = {
 
 type AnthropicProviderConfig = {
   provider: "anthropic";
-  apiKey?: string;
   params: {
     type: "chat" | undefined;
     model?: string;
@@ -118,6 +116,7 @@ export type ProviderConfig = OpenAIProviderConfig | AnthropicProviderConfig;
 export interface RequestConfig {
   projectId?: string;
   userId?: string;
+  providerApiKey?: string;
   providerConfig?: ProviderConfig;
 }
 
