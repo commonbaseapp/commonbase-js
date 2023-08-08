@@ -10,6 +10,7 @@ interface CreateCompletionRequest
   extends originalOpenAI.CreateCompletionRequest {
   variables?: Record<string, string>;
   projectId: string;
+  prompt: string;
 }
 
 interface CreatChatCompletionRequest
@@ -39,6 +40,10 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
     const res = await this.cbClient.createCompletion({
       userId: createChatCompletionRequest.user,
       chatContext: {
+        // The OpenAI chat messages can contain a role of "function",
+        // which we don't support yet.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         messages: createChatCompletionRequest.messages,
       },
       projectId: createChatCompletionRequest.projectId,

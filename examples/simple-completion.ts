@@ -8,7 +8,8 @@ async function main() {
     apiKey: process.env.CB_API_KEY!,
     projectId: process.env.CB_PROJECT_ID,
   });
-  const completionStream = await client.createStreamingCompletion({
+  const completionStream = await client.streamCompletion({
+    prompt: "Greet our new customer with the name {{user}} who just signed up.",
     variables: {
       user: "Alice",
     },

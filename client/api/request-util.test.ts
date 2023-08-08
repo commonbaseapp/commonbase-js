@@ -76,10 +76,11 @@ describe("getCompletionBody", () => {
   });
 
   it("should apply default config from client options.", () => {
-    const body = getCompletionBody({}, mockClientOptions);
+    const body = getCompletionBody({ prompt: "" }, mockClientOptions);
 
     expect(body).toEqual({
       projectId: mockClientOptions.projectId,
+      prompt: "",
     });
 
     // If 'variables' is not set in the config, then the client's
