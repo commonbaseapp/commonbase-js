@@ -11,7 +11,8 @@ async function main() {
   });
 
   const buildLogs = await readFile("./build.log", "utf8");
-  const completionStream = await client.createStreamingCompletion({
+  const completionStream = await client.streamCompletion({
+    prompt: "Identify the error in these build logs: \n\n {{build_logs}}",
     variables: {
       build_logs: buildLogs,
     },

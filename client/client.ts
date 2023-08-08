@@ -27,9 +27,7 @@ export class Client {
     );
   }
 
-  async createStreamingCompletion(
-    config: CompletionConfig,
-  ): Promise<StreamConsumer> {
+  async streamCompletion(config: CompletionConfig): Promise<StreamConsumer> {
     const res = await fetchCompletionsAPI(config, this.options, true);
     if (!res.body) {
       throw new Error("no stream body");

@@ -36,23 +36,23 @@ describe("Client", () => {
       Promise.resolve(new Response("{}")),
     );
     expect(
-      new Client(mockClientOptions).createCompletion({}),
+      new Client(mockClientOptions).createCompletion({ prompt: "" }),
     ).resolves.toBeInstanceOf(CompletionResult);
   });
 
-  it("should return a StreamConsumer from createStreamingCompletion", () => {
+  it("should return a StreamConsumer from streamCompletion", () => {
     mockFetchCompletions.mockReturnValueOnce(
       Promise.resolve(new Response("{}")),
     );
     expect(
-      new Client(mockClientOptions).createStreamingCompletion({}),
+      new Client(mockClientOptions).streamCompletion({ prompt: "" }),
     ).resolves.toBeInstanceOf(StreamConsumer);
   });
 
-  it("should throw error on empty body from createStreamingCompletion", () => {
+  it("should throw error on empty body from sCompletion", () => {
     mockFetchCompletions.mockReturnValueOnce(Promise.resolve(new Response()));
     expect(
-      new Client(mockClientOptions).createStreamingCompletion({}),
+      new Client(mockClientOptions).streamCompletion({ prompt: "" }),
     ).rejects.toEqual(new Error("no stream body"));
   });
 

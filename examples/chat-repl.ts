@@ -16,7 +16,7 @@ const client = new Client({
 });
 
 async function askQuestion(context: ChatContext) {
-  return client.createStreamingCompletion({
+  return client.streamCompletion({
     prompt: "You are a demo chatbot.",
     chatContext: context,
     userId: "anonymous-example-user",

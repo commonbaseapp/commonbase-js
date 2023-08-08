@@ -1,1 +1,1 @@
-export { ChatClient, Client } from "./client";
+export { Client } from "./client";

@@ -10,6 +10,7 @@ interface CreateCompletionRequest
   extends originalOpenAI.CreateCompletionRequest {
   variables?: Record<string, string>;
   projectId: string;
+  prompt: string;
 }
 
 interface CreatChatCompletionRequest

@@ -42,6 +42,6 @@ const completion = await client.createCompletion({
 console.log(completion.bestResult);
 ```
 
-To stream a completion as it is generated, use `createStreamingCompletion`.
+To stream a completion as it is generated, use `streamCompletion`.
 
 For more examples, see [/examples](https://github.com/commonbaseapp/sdk/tree/main/examples).
