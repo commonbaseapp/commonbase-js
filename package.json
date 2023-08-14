@@ -4,7 +4,7 @@
   "description": "Commonbase is a Typescript SDK for building LLM integrations and tooling",
   "repository": {
     "type": "git",
-    "url": "git@github.com:commonbaseapp/sdk.git"
+    "url": "git@github.com:commonbaseapp/commonbase-js.git"
   },
   "keywords": [
     "commonbase",
