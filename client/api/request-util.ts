@@ -33,7 +33,6 @@ export function getCompletionBody(
     variables: config.variables ? config.variables : undefined,
     context: config.chatContext,
     userId: config.userId,
-    truncateVariable: config.truncateVariable,
     prompt: config.prompt,
     providerConfig: config.providerConfig,
   };

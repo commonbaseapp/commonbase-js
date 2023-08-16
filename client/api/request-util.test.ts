@@ -23,12 +23,6 @@ const mockCompletionConfig: Required<CompletionConfig> = {
     test1: "123",
     test2: "abc",
   },
-  truncateVariable: {
-    strategy: "truncate_head",
-    granularity: "word",
-    maxPromptTokens: 1,
-    name: "name",
-  },
   providerApiKey: "openaiApiKey",
   providerConfig: {
     provider: "openai",
@@ -67,7 +61,6 @@ describe("getCompletionBody", () => {
       prompt: mockCompletionConfig.prompt,
       context: mockCompletionConfig.chatContext,
       variables: mockCompletionConfig.variables,
-      truncateVariable: mockCompletionConfig.truncateVariable,
       providerConfig: {
         ...mockCompletionConfig.providerConfig,
         apiKey: undefined,
@@ -96,7 +89,6 @@ describe("getCompletionBody", () => {
       userId: mockCompletionConfig.userId,
       prompt: mockCompletionConfig.prompt,
       context: mockCompletionConfig.chatContext,
-      truncateVariable: mockCompletionConfig.truncateVariable,
       variables: mockCompletionConfig.variables,
       providerConfig: {
         ...mockCompletionConfig.providerConfig,

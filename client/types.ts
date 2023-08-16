@@ -22,14 +22,6 @@ type CompletionResponseChoice = {
   logprobs?: number;
 };
 
-type TruncationResult = {
-  config: TruncationConfig;
-  cutoff: number;
-  truncated: boolean;
-  promptTokens: number;
-  iterations: number;
-};
-
 export type CompletionResponse = {
   completed: boolean;
   invocationId: string;
@@ -37,7 +29,6 @@ export type CompletionResponse = {
   type: string;
   model: string;
   choices: CompletionResponseChoice[];
-  variableTruncation?: TruncationResult;
 };
 
 export type EmbeddingsResponse = {
@@ -58,13 +49,6 @@ export type APIErrorResponse = {
   invocationId?: string;
   providerError?: string;
   sentryId?: string;
-};
-
-export type TruncationConfig = {
-  strategy: "truncate_head" | "truncate_tail" | "off"; // default: off
-  granularity?: "word" | "line"; // default: line
-  maxPromptTokens?: number;
-  name?: string;
 };
 
 type OpenAIProviderConfig = {
@@ -111,7 +95,6 @@ export interface CompletionConfig extends RequestConfig {
   prompt: string;
   chatContext?: ChatContext;
   variables?: Record<string, string>;
-  truncateVariable?: TruncationConfig;
 }
 
 export interface EmbeddingsConfig extends RequestConfig {
