@@ -16,10 +16,6 @@ async function main() {
     variables: {
       build_logs: buildLogs,
     },
-    truncateVariable: {
-      strategy: "truncate_head",
-      maxPromptTokens: 3000,
-    },
   });
   for await (const completionResult of completionStream) {
     if (completionResult.completed) {
