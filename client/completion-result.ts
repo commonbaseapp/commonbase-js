@@ -75,7 +75,7 @@ export class CompletionResult {
     return this._rawResponse.completed;
   }
 
-  get asJson(): CompletionResponse {
+  get json(): CompletionResponse {
     return this._rawResponse;
   }
 }

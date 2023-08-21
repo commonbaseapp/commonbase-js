@@ -21,14 +21,23 @@ interface CreatChatCompletionRequest
 // override the OpenAIApi class to use the commonbase client
 export class OpenAIApi extends originalOpenAI.OpenAIApi {
   private cbClient: Client;
+  private cbApiKey: string;
+  private openaiApiKey: string;
   constructor(
     configuration: originalOpenAI.Configuration,
     basePath?: string,
     axios?: AxiosInstance,
   ) {
     super(configuration, basePath, axios);
+    if (typeof configuration.apiKey !== "function") {
+      throw Error(
+        "OpenAI configuration must contain an apiKey parameter that is a function.",
+      );
+    }
+    this.cbApiKey = configuration.apiKey("commonbase") as string;
+    this.openaiApiKey = configuration.apiKey("openai") as string;
     this.cbClient = new Client({
-      apiKey: configuration.apiKey as string,
+      apiKey: this.cbApiKey,
     });
   }
 
@@ -37,37 +46,32 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
     options?: AxiosRequestConfig,
   ) {
     // return super.createChatCompletion(createChatCompletionRequest, options);
-    const res = await this.cbClient.createCompletion({
+    const res = await this.cbClient.createChatCompletion({
       userId: createChatCompletionRequest.user,
-      chatContext: {
-        // The OpenAI chat messages can contain a role of "function",
-        // which we don't support yet.
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        messages: createChatCompletionRequest.messages,
-      },
+      // The OpenAI chat messages can contain a role of "function",
+      // which we don't support yet.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      messages: createChatCompletionRequest.messages,
       projectId: createChatCompletionRequest.projectId,
-      prompt: "\n", // we need to set prompt to avoid the default prompt
-      providerConfig: {
-        provider: "openai",
-        params: {
-          type: "chat",
-          model: createChatCompletionRequest.model,
-          max_tokens: createChatCompletionRequest.max_tokens || undefined,
-          temperature: createChatCompletionRequest.temperature || undefined,
-          top_p: createChatCompletionRequest.top_p || undefined,
-          n: createChatCompletionRequest.n || undefined,
-          frequency_penalty:
-            createChatCompletionRequest.frequency_penalty || undefined,
-          presence_penalty:
-            createChatCompletionRequest.presence_penalty || undefined,
-          stop: createChatCompletionRequest.stop || undefined,
-        },
+      provider: "openai",
+      providerApiKey: this.openaiApiKey,
+      providerModel: createChatCompletionRequest.model,
+      providerParams: {
+        max_tokens: createChatCompletionRequest.max_tokens || undefined,
+        temperature: createChatCompletionRequest.temperature || undefined,
+        top_p: createChatCompletionRequest.top_p || undefined,
+        n: createChatCompletionRequest.n || undefined,
+        frequency_penalty:
+          createChatCompletionRequest.frequency_penalty || undefined,
+        presence_penalty:
+          createChatCompletionRequest.presence_penalty || undefined,
+        stop: createChatCompletionRequest.stop || undefined,
       },
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const transformedChoices = res._raw.choices.map((choice: any) => {
+    const transformedChoices = res.json.choices.map((choice: any) => {
       // transform text response to messages response
       choice.message = {
         content: choice.text,
@@ -80,7 +84,7 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
 
     return {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: { ...(res._raw as any), choices: transformedChoices },
+      data: { ...(res.json as any), choices: transformedChoices },
       status: 200,
       headers: {},
       config: options,
@@ -95,30 +99,27 @@ export class OpenAIApi extends originalOpenAI.OpenAIApi {
       userId: createCompletionRequest.user,
       projectId: createCompletionRequest.projectId,
       prompt: createCompletionRequest.prompt?.toString(),
-      providerConfig: {
-        provider: "openai",
-        params: {
-          type: "text",
-          model: createCompletionRequest.model,
-          max_tokens: createCompletionRequest.max_tokens || undefined,
-          temperature: createCompletionRequest.temperature || undefined,
-          top_p: createCompletionRequest.top_p || undefined,
-          n: createCompletionRequest.n || undefined,
-          frequency_penalty:
-            createCompletionRequest.frequency_penalty || undefined,
-          presence_penalty:
-            createCompletionRequest.presence_penalty || undefined,
-          stop: createCompletionRequest.stop || undefined,
-          best_of: createCompletionRequest.best_of || undefined,
-          suffix: createCompletionRequest.suffix || undefined,
-          logprobs: createCompletionRequest.logprobs || undefined,
-        },
+      provider: "openai",
+      providerModel: createCompletionRequest.model,
+      providerApiKey: this.openaiApiKey,
+      providerParams: {
+        max_tokens: createCompletionRequest.max_tokens || undefined,
+        temperature: createCompletionRequest.temperature || undefined,
+        top_p: createCompletionRequest.top_p || undefined,
+        n: createCompletionRequest.n || undefined,
+        frequency_penalty:
+          createCompletionRequest.frequency_penalty || undefined,
+        presence_penalty: createCompletionRequest.presence_penalty || undefined,
+        stop: createCompletionRequest.stop || undefined,
+        best_of: createCompletionRequest.best_of || undefined,
+        suffix: createCompletionRequest.suffix || undefined,
+        logprobs: createCompletionRequest.logprobs || undefined,
       },
     });
 
     return {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: res._raw as any,
+      data: res.json as any,
       status: 200,
       headers: {},
       config: options,

@@ -8,22 +8,13 @@ async function main() {
     apiKey: process.env.CB_API_KEY!,
     projectId: process.env.CB_PROJECT_ID,
   });
-  const completionStream = await client.streamCompletion({
+  const result = await client.createCompletion({
     prompt: "Greet our new customer with the name {{user}} who just signed up.",
     variables: {
       user: "Alice",
     },
   });
-  for await (const completionResult of completionStream) {
-    if (completionResult.completed) {
-      process.stdout.write("\n\n");
-      console.log("streamCompleted", completionResult);
-      continue;
-    }
-    process.stdout.write(completionResult.bestResult);
-  }
-
-  console.log("done");
+  console.log(result.bestChoice.text);
 }
 
 main().catch(console.error);

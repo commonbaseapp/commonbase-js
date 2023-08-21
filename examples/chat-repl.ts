@@ -3,7 +3,7 @@ import * as readline from "node:readline/promises";
 
 // import { Client } from "@commonbase/sdk";
 import { Client } from "../index";
-import { ChatContext } from "../client/types";
+import { ChatMessage } from "../client/types";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -15,28 +15,12 @@ const client = new Client({
   projectId: process.env.CB_PROJECT_ID,
 });
 
-async function askQuestion(context: ChatContext) {
-  return client.streamCompletion({
-    prompt: "You are a demo chatbot.",
-    chatContext: context,
-    userId: "anonymous-example-user",
-    providerConfig: {
-      provider: "cb-openai-eu",
-      params: {
-        type: "chat",
-      },
-    },
-  });
-}
-
 async function main() {
   console.log("Welcome to the Commonbase chat assistant!");
   console.log("Type your question and press enter to send it.");
   console.log("Type 'exit' or 'quit' to quit.");
 
-  const context: ChatContext = {
-    messages: [],
-  };
+  const messages: ChatMessage[] = [];
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -48,21 +32,22 @@ async function main() {
       console.log("Type your question and press enter to send it.");
       continue;
     }
-    context.messages.push({
+    messages.push({
       role: "user",
       content: question,
     });
-    const completionStream = await askQuestion(context);
+    const completionStream = await client.streamChatCompletion({
+      messages,
+      userId: "anonymous-example-user",
+      provider: "cb-openai-eu",
+    });
     for await (const completionResult of completionStream) {
       if (completionResult.completed) {
         process.stdout.write("\n\n");
-        context.messages.push({
-          role: "assistant",
-          content: completionResult.bestResult,
-        });
+        messages.push(completionResult.bestChoice.toAssistantChatMessage());
         continue;
       }
-      process.stdout.write(completionResult.bestResult);
+      process.stdout.write(completionResult.bestChoice.text);
     }
   }
 

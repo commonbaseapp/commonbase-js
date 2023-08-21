@@ -78,7 +78,7 @@ describe("StreamConsumer", () => {
     }
 
     // Expect to get the exact same set of results back from the StreamConsumer
-    expect(resultsFromStream.map((r) => r.asJson)).toEqual(mockResponses);
+    expect(resultsFromStream.map((r) => r.json)).toEqual(mockResponses);
   });
 
   it("throw error on invalid stream data", async () => {

@@ -134,4 +134,4 @@ export type RequestType = "text" | "chat" | "embeddings";
 
 export type EmbeddingsConfig = RequestConfig & {
   input: string;
-} & OpenAIProviderConfig;
+} & (OpenAIProviderConfig | CbOpenAIProviderConfig);

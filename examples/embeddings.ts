@@ -10,13 +10,6 @@ async function main() {
   });
   const embeddingsResponse = await client.createEmbedding({
     input: "Your text string",
-    providerConfig: {
-      provider: "cb-openai-eu",
-      params: {
-        type: "embeddings",
-        model: "text-embedding-ada-002",
-      },
-    },
   });
 
   console.log(embeddingsResponse.data);
