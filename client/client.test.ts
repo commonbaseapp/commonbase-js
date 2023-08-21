@@ -40,19 +40,28 @@ describe("Client", () => {
     ).resolves.toBeInstanceOf(CompletionResult);
   });
 
+  it("should return a CompletionResult from createChatCompletion", () => {
+    mockFetchCompletions.mockReturnValueOnce(
+      Promise.resolve(new Response("{}")),
+    );
+    expect(
+      new Client(mockClientOptions).createChatCompletion({ messages: [] }),
+    ).resolves.toBeInstanceOf(CompletionResult);
+  });
+
   it("should return a StreamConsumer from streamCompletion", () => {
     mockFetchCompletions.mockReturnValueOnce(
       Promise.resolve(new Response("{}")),
     );
     expect(
-      new Client(mockClientOptions).streamCompletion({ prompt: "" }),
+      new Client(mockClientOptions).streamChatCompletion({ messages: [] }),
     ).resolves.toBeInstanceOf(StreamConsumer);
   });
 
   it("should throw error on empty body from sCompletion", () => {
     mockFetchCompletions.mockReturnValueOnce(Promise.resolve(new Response()));
     expect(
-      new Client(mockClientOptions).streamCompletion({ prompt: "" }),
+      new Client(mockClientOptions).streamChatCompletion({ messages: [] }),
     ).rejects.toEqual(new Error("no stream body"));
   });
 

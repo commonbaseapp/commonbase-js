@@ -70,6 +70,7 @@ describe("StreamConsumer", () => {
     });
 
     const consumer = new StreamConsumer(mockResponseStream);
+    consumer.setMinimumDelay(1);
 
     const resultsFromStream: CompletionResult[] = [];
     for await (const result of consumer) {
@@ -77,7 +78,7 @@ describe("StreamConsumer", () => {
     }
 
     // Expect to get the exact same set of results back from the StreamConsumer
-    expect(resultsFromStream.map((r) => r._raw)).toEqual(mockResponses);
+    expect(resultsFromStream.map((r) => r.asJson)).toEqual(mockResponses);
   });
 
   it("throw error on invalid stream data", async () => {

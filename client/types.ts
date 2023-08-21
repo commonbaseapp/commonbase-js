@@ -3,23 +3,46 @@ export type ClientOptions = {
   projectId?: string;
 };
 
-export type Role = "system" | "user" | "assistant";
+type Role = "system" | "user" | "assistant" | "function";
 
-export type ChatMessage = {
-  role: Role;
+type FunctionCall = {
+  name: string;
+  arguments?: string;
+};
+
+export type TextChatMessage = {
+  role: Extract<Role, "system" | "user" | "assistant">;
   content: string;
 };
 
-export type ChatContext = {
-  messages: ChatMessage[];
+export type FunctionCallChatMessage = {
+  role: Extract<Role, "assistant">;
+  function_call: FunctionCall;
 };
 
-type CompletionResponseChoice = {
+export type FunctionChatMessage = {
+  role: Extract<Role, "function">;
+  name: string;
+  content: string;
+};
+
+export type ChatMessage =
+  | TextChatMessage
+  | FunctionCallChatMessage
+  | FunctionChatMessage;
+
+type FunctionCallResponse = {
+  name: string;
+  arguments?: string;
+};
+
+export type CompletionResponseChoice = {
   index: number;
   finish_reason: string | null;
   text: string;
   role?: Role;
   logprobs?: number;
+  function_call?: FunctionCallResponse;
 };
 
 export type CompletionResponse = {
@@ -52,10 +75,10 @@ export type APIErrorResponse = {
 };
 
 type OpenAIProviderConfig = {
-  provider: "openai" | "cb-openai-eu";
-  params: {
-    type: "chat" | "text" | "embeddings";
-    model?: string;
+  provider?: "openai";
+  providerApiKey?: string;
+  providerModel?: string;
+  providerParams?: {
     temperature?: number;
     top_p?: number;
     max_tokens?: number;
@@ -69,11 +92,18 @@ type OpenAIProviderConfig = {
   };
 };
 
+type CbOpenAIProviderConfig = Omit<
+  OpenAIProviderConfig,
+  "provider" | "providerApiKey"
+> & {
+  provider: "cb-openai-eu" | "cb-openai-us";
+};
+
 type AnthropicProviderConfig = {
-  provider: "anthropic";
-  params: {
-    type: "chat" | undefined;
-    model?: string;
+  provider?: "anthropic";
+  providerApiKey?: string;
+  providerModel?: string;
+  providerParams?: {
     max_tokens_to_sample?: number;
     temperature?: number;
     stop_sequences?: string[];
@@ -82,21 +112,26 @@ type AnthropicProviderConfig = {
   };
 };
 
-export type ProviderConfig = OpenAIProviderConfig | AnthropicProviderConfig;
-
-export interface RequestConfig {
+export type RequestConfig = {
   projectId?: string;
   userId?: string;
-  providerApiKey?: string;
-  providerConfig?: ProviderConfig;
-}
+};
 
-export interface CompletionConfig extends RequestConfig {
+export type TextCompletionConfig = RequestConfig & {
   prompt: string;
-  chatContext?: ChatContext;
   variables?: Record<string, string>;
-}
+} & (OpenAIProviderConfig | CbOpenAIProviderConfig);
 
-export interface EmbeddingsConfig extends RequestConfig {
+export type ChatCompletionConfig = RequestConfig & {
+  messages: ChatMessage[];
+} & (OpenAIProviderConfig | CbOpenAIProviderConfig | AnthropicProviderConfig);
+
+export type Provider = Required<
+  TextCompletionConfig | ChatCompletionConfig
+>["provider"];
+
+export type RequestType = "text" | "chat" | "embeddings";
+
+export type EmbeddingsConfig = RequestConfig & {
   input: string;
-}
+} & OpenAIProviderConfig;
