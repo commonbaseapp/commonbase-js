@@ -43,7 +43,7 @@ describe("CompletionResult", () => {
     expect(mockCompletionResult.completed).toBe(true);
   });
 
-  it("should return first choice for bestResult", () => {
+  it("should return first choice for bestChoice", () => {
     expect(mockCompletionResult.bestChoice.text).toBe("first choice");
   });
 
