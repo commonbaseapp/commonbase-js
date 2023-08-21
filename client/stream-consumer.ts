@@ -1,11 +1,18 @@
 import { CompletionResult } from "./completion-result";
 import type { CompletionResponse } from "./types";
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export class StreamConsumer {
   private stream: ReadableStreamDefaultReader;
   private streamDrained = false;
   private decoder = new TextDecoder();
   private buffer: Uint8Array = new Uint8Array();
+
+  private minDelay = 0;
+  private lastResponseTs = 0;
 
   constructor(stream: ReadableStream<Uint8Array>) {
     this.stream = stream.getReader();
@@ -18,6 +25,10 @@ export class StreamConsumer {
       return;
     }
     this.buffer = new Uint8Array([...this.buffer, ...value]);
+  }
+
+  setMinimumDelay(ms: number) {
+    this.minDelay = ms;
   }
 
   async next(): Promise<IteratorResult<CompletionResult>> {
@@ -41,6 +52,11 @@ export class StreamConsumer {
     } catch (e) {
       throw new Error(`invalid stream data: ${line.slice(6)}`);
     }
+    const timeSinceLastResponse = Date.now() - this.lastResponseTs;
+    if (timeSinceLastResponse < this.minDelay) {
+      await sleep(this.minDelay - timeSinceLastResponse);
+    }
+    this.lastResponseTs = Date.now();
     return { done: false, value: new CompletionResult(data) };
   }
   [Symbol.asyncIterator]() {

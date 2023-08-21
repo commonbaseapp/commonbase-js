@@ -4,9 +4,14 @@ import * as process from "process";
 // import { Configuration, OpenAIApi } from "@commonbase/sdk/openai";
 import { Configuration, OpenAIApi } from "../openai";
 
+const API_KEYS: Record<string, string> = {
+  commonbase: process.env.OPENAI_API_KEY as string,
+  openai: process.env.CB_API_KEY as string,
+};
+
 async function main() {
   const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: (name: string) => API_KEYS[name],
   });
   const openai = new OpenAIApi(configuration);
 

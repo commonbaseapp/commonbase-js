@@ -14,7 +14,7 @@ const mockClientOptions: ClientOptions = {
 describe("fetchCompletionsAPI", () => {
   it("should return Response object when fetch successful", () => {
     mockFetch.mockReturnValueOnce(Promise.resolve(new Response("{}")));
-    const res = fetchCompletionsAPI({ prompt: "" }, mockClientOptions);
+    const res = fetchCompletionsAPI({ prompt: "" }, mockClientOptions, "text");
     expect(res).toBeInstanceOf(Promise<Response>);
   });
 
@@ -23,7 +23,7 @@ describe("fetchCompletionsAPI", () => {
       Promise.resolve(new Response("{}", { status: 400 })),
     );
     expect(
-      fetchCompletionsAPI({ prompt: "" }, mockClientOptions),
+      fetchCompletionsAPI({ prompt: "" }, mockClientOptions, "text"),
     ).rejects.toBeInstanceOf(APIError);
   });
 });

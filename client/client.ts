@@ -2,11 +2,12 @@ import { fetchCompletionsAPI, fetchEmbeddingsAPI } from "./api/request";
 import { CompletionResult } from "./completion-result";
 import { StreamConsumer } from "./stream-consumer";
 import type {
+  ChatCompletionConfig,
   ClientOptions,
-  CompletionConfig,
   CompletionResponse,
   EmbeddingsConfig,
   EmbeddingsResponse,
+  TextCompletionConfig,
 } from "./types";
 
 export class Client {
@@ -19,16 +20,38 @@ export class Client {
     this.options = options;
   }
 
-  async createCompletion(config: CompletionConfig): Promise<CompletionResult> {
-    const completionsRes = await fetchCompletionsAPI(config, this.options);
+  async createCompletion(
+    config: TextCompletionConfig,
+  ): Promise<CompletionResult> {
+    const completionsRes = await fetchCompletionsAPI(
+      config,
+      this.options,
+      "text",
+    );
 
     return new CompletionResult(
       (await completionsRes.json()) as CompletionResponse,
     );
   }
 
-  async streamCompletion(config: CompletionConfig): Promise<StreamConsumer> {
-    const res = await fetchCompletionsAPI(config, this.options, true);
+  async createChatCompletion(
+    config: ChatCompletionConfig,
+  ): Promise<CompletionResult> {
+    const completionsRes = await fetchCompletionsAPI(
+      config,
+      this.options,
+      "chat",
+    );
+
+    return new CompletionResult(
+      (await completionsRes.json()) as CompletionResponse,
+    );
+  }
+
+  async streamChatCompletion(
+    config: ChatCompletionConfig,
+  ): Promise<StreamConsumer> {
+    const res = await fetchCompletionsAPI(config, this.options, "chat", true);
     if (!res.body) {
       throw new Error("no stream body");
     }

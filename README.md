@@ -41,10 +41,10 @@ const completion = await client.createCompletion({
   prompt: "Hello",
 });
 
-console.log(completion.bestResult);
+console.log(completion.bestChoice.text);
 ```
 
-To stream a completion as it is generated, use `streamCompletion`.
+To stream a completion as it is generated, use `streamChatCompletion`.
 
 For more examples, see
 [/examples](https://github.com/commonbaseapp/commonbase-js/tree/main/examples).

@@ -1,7 +1,9 @@
 import type {
+  ChatCompletionConfig,
   ClientOptions,
-  CompletionConfig,
   EmbeddingsConfig,
+  RequestType,
+  TextCompletionConfig,
 } from "../types";
 import { APIError } from "./error";
 import {
@@ -12,14 +14,15 @@ import {
 } from "./request-util";
 
 export async function fetchCompletionsAPI(
-  config: CompletionConfig,
+  config: TextCompletionConfig | ChatCompletionConfig,
   options: ClientOptions,
+  type: Exclude<RequestType, "embeddings">,
   stream = false,
 ): Promise<Response> {
   const res = await fetch(getUrl("completions"), {
     method: "POST",
     body: JSON.stringify({
-      ...getCompletionBody(config, options),
+      ...getCompletionBody(config, options, type),
       stream,
     }),
     headers: getHeaders(options, config),
