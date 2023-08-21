@@ -27,13 +27,17 @@ export function getHeaders(options: ClientOptions, config: RequestConfig) {
   return headers;
 }
 
-export function getDefaultProviderModel(provider: Provider, type: RequestType) {
+export function getDefaultProviderModel(
+  provider: Provider,
+  type: RequestType,
+  hasFunctions: boolean,
+) {
   if (provider.includes("openai")) {
     switch (type) {
       case "text":
         return "text-davinci-003";
       case "chat":
-        return "gpt-3.5-turbo";
+        return hasFunctions ? "gpt-4" : "gpt-3.5-turbo";
       case "embeddings":
         return "text-embeddings-ada-002";
     }
@@ -47,9 +51,12 @@ export function getProviderConfig(
   config: TextCompletionConfig | ChatCompletionConfig | EmbeddingsConfig,
   type: RequestType,
 ) {
-  const providerName = config.provider ?? "cb-openai-eu";
+  const providerName =
+    config.provider ??
+    ("functions" in config ? "cb-openai-us" : "cb-openai-eu");
   const providerModel =
-    config.providerModel ?? getDefaultProviderModel(providerName, type);
+    config.providerModel ??
+    getDefaultProviderModel(providerName, type, "functions" in config);
   const providerParams = {
     ...config.providerParams,
     type,

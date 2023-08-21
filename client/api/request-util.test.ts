@@ -137,6 +137,31 @@ describe("getCompletionBody", () => {
     expect(body.variables).toBeUndefined();
   });
 
+  it("should default to cb-openai-us and gpt-4 with functions", () => {
+    const config: ChatCompletionConfig = {
+      ...mockCompletionChatConfig,
+    };
+    delete config.provider;
+    delete config.providerModel;
+    delete config.providerParams;
+    const body = getCompletionBody(config, mockClientOptions, "chat");
+
+    expect(body).toEqual({
+      projectId: mockCompletionChatConfig.projectId,
+      userId: mockCompletionChatConfig.userId,
+      messages: mockCompletionChatConfig.messages,
+      functions: mockCompletionChatConfig.functions,
+      functionCall: mockCompletionChatConfig.functionCall,
+      providerConfig: {
+        provider: "cb-openai-us",
+        params: {
+          type: "chat",
+          model: "gpt-4",
+        },
+      },
+    });
+  });
+
   it("should overwrite/merge client options default with config", () => {
     const body = getCompletionBody(
       mockCompletionTextConfig,
@@ -235,12 +260,17 @@ describe("getHeaders", () => {
 
 describe("getDefaultProviderModel", () => {
   it("should return claude-v1 for anthropic provider", () => {
-    expect(getDefaultProviderModel("anthropic", "chat")).toBe("claude-v1");
+    expect(getDefaultProviderModel("anthropic", "chat", false)).toBe(
+      "claude-v1",
+    );
   });
   it("should throw error on invalid provider", () => {
     expect(() =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      getDefaultProviderModel("invalid" as any, "chat"),
+      getDefaultProviderModel("invalid" as any, "chat", false),
     ).toThrowError("Unable to determine default provider model.");
+  });
+  it("should use gpt-4 with functions", () => {
+    expect(getDefaultProviderModel("cb-openai-us", "chat", true)).toBe("gpt-4");
   });
 });
