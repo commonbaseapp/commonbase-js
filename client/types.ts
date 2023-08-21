@@ -74,6 +74,15 @@ export type APIErrorResponse = {
   sentryId?: string;
 };
 
+type ChatFunction = {
+  name: string;
+  description: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parameters: Record<string, any>;
+};
+
+type FunctionCallConfig = "none" | "auto" | { name: string };
+
 type OpenAIProviderConfig = {
   provider?: "openai";
   providerApiKey?: string;
@@ -124,6 +133,8 @@ export type TextCompletionConfig = RequestConfig & {
 
 export type ChatCompletionConfig = RequestConfig & {
   messages: ChatMessage[];
+  functions?: ChatFunction[];
+  functionCall?: FunctionCallConfig;
 } & (OpenAIProviderConfig | CbOpenAIProviderConfig | AnthropicProviderConfig);
 
 export type Provider = Required<

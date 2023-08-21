@@ -80,6 +80,8 @@ export function getCompletionBody(
     return {
       projectId: config.projectId ?? options.projectId,
       messages: config.messages,
+      functions: config.functions,
+      functionCall: config.functionCall,
       userId: config.userId,
       providerConfig: getProviderConfig(config, type),
     };

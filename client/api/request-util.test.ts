@@ -34,6 +34,16 @@ const mockCompletionChatConfig: Required<ChatCompletionConfig> = {
   projectId: "projectId",
   userId: "userId",
   messages: [{ role: "user", content: "content" }],
+  functions: [
+    {
+      name: "function name",
+      description: "function description",
+      parameters: {
+        test: "test",
+      },
+    },
+  ],
+  functionCall: "auto",
   provider: "cb-openai-eu",
   providerModel: "model",
   providerParams: {
@@ -94,6 +104,8 @@ describe("getCompletionBody", () => {
       projectId: mockCompletionChatConfig.projectId,
       userId: mockCompletionChatConfig.userId,
       messages: mockCompletionChatConfig.messages,
+      functions: mockCompletionChatConfig.functions,
+      functionCall: mockCompletionChatConfig.functionCall,
       providerConfig: {
         provider: mockCompletionChatConfig.provider,
         params: {
