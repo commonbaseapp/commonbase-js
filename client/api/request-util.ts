@@ -9,7 +9,8 @@ import type {
   TextCompletionConfig,
 } from "../types";
 
-const ROOT_API_URL = "https://api.commonbase.com";
+const ROOT_API_URL =
+  process.env.NEXT_PUBLIC_API_ENDPOINT || "https://api.commonbase.com";
 
 export function getUrl(path: string) {
   return `${ROOT_API_URL}/${path}`;
