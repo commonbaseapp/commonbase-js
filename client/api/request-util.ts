@@ -87,6 +87,7 @@ export function getCompletionBody(
   } else {
     return {
       projectId: config.projectId ?? options.projectId,
+      variables: config.variables ? config.variables : undefined,
       messages: config.messages,
       functions: config.functions,
       functionCall: config.functionCall,

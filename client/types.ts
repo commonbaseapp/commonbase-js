@@ -133,6 +133,7 @@ export type TextCompletionConfig = RequestConfig & {
 
 export type ChatCompletionConfig = RequestConfig & {
   messages: ChatMessage[];
+  variables?: Record<string, string>;
   functions?: ChatFunction[];
   functionCall?: FunctionCallConfig;
 } & (OpenAIProviderConfig | CbOpenAIProviderConfig | AnthropicProviderConfig);

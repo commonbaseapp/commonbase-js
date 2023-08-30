@@ -34,6 +34,10 @@ const mockCompletionChatConfig: Required<ChatCompletionConfig> = {
   projectId: "projectId",
   userId: "userId",
   messages: [{ role: "user", content: "content" }],
+  variables: {
+    test1: "123",
+    test2: "abc",
+  },
   functions: [
     {
       name: "function name",
@@ -114,6 +118,7 @@ describe("getCompletionBody", () => {
           ...mockCompletionChatConfig.providerParams,
         },
       },
+      variables: mockCompletionChatConfig.variables,
     });
   });
 
@@ -159,6 +164,7 @@ describe("getCompletionBody", () => {
           model: "gpt-4",
         },
       },
+      variables: mockCompletionChatConfig.variables,
     });
   });
 
