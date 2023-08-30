@@ -98,4 +98,24 @@ describe("StreamConsumer", () => {
       }
     }).rejects.toThrowError("invalid stream data: this isn't json data");
   });
+
+  it("throw error on stream error data", async () => {
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode(
+            `data: ${JSON.stringify({ error: "test error" })}\n\n`,
+          ),
+        );
+        controller.close();
+      },
+    });
+    const consumer = new StreamConsumer(stream);
+
+    expect(async () => {
+      for await (const result of consumer) {
+        console.log(result);
+      }
+    }).rejects.toThrowError("api error (status=500): test error");
+  });
 });

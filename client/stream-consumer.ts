@@ -1,5 +1,6 @@
+import { APIError } from "./api/error";
 import { CompletionResult } from "./completion-result";
-import type { CompletionResponse } from "./types";
+import type { APIErrorResponse, CompletionResponse } from "./types";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -46,11 +47,15 @@ export class StreamConsumer {
     if (!line.startsWith("data: ")) {
       return this.next();
     }
-    let data: CompletionResponse;
+    let data: CompletionResponse | APIErrorResponse;
     try {
       data = JSON.parse(line.slice(6));
     } catch (e) {
       throw new Error(`invalid stream data: ${line.slice(6)}`);
+    }
+    if ("error" in data) {
+      // if an error occurs during the stream, we throw an error
+      throw new APIError(500, data);
     }
     const timeSinceLastResponse = Date.now() - this.lastResponseTs;
     if (timeSinceLastResponse < this.minDelay) {
