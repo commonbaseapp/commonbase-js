@@ -105,7 +105,7 @@ type CbOpenAIProviderConfig = Omit<
   OpenAIProviderConfig,
   "provider" | "providerApiKey"
 > & {
-  provider?: "cb-openai-eu" | "cb-openai-us";
+  provider?: "cb-openai-eu" | "cb-openai-us" | "cb-openai";
 };
 
 type AnthropicProviderConfig = {
