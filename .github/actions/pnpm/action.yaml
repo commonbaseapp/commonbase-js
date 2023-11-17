@@ -1,10 +1,10 @@
-name: "pnpm"
-description: "Node.js & pnpm setup"
+name: "bun"
+description: "Node.js, bun & pnpm setup"
 inputs:
   node-version:
     description: "The version of Node.js"
     required: true
-    default: "18.x"
+    default: "20.x"
 runs:
   using: "composite"
   steps:
@@ -14,19 +14,11 @@ runs:
         registry-url: "https://registry.npmjs.org"
     - uses: pnpm/action-setup@v2
       with:
-        version: 7
+        version: 8
         run_install: false
-    - name: Get pnpm store directory
-      id: pnpm-cache
-      shell: bash
-      run: |
-        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-    - uses: actions/cache@v3
-      name: Setup pnpm cache
+    - uses: oven-sh/setup-bun@v1
+      name: Install bun
       with:
-        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
-    - run: pnpm install
+        bun-version: "latest"
+    - run: bun install
       shell: bash
