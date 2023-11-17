@@ -1,4 +1,5 @@
 import type {
+  APIErrorResponse,
   ChatCompletionConfig,
   ClientOptions,
   EmbeddingsConfig,
@@ -30,7 +31,7 @@ export async function fetchCompletionsAPI(
 
   if (!res.ok) {
     const resBody = await res.json();
-    throw new APIError(res.status, resBody);
+    throw new APIError(res.status, resBody as APIErrorResponse);
   }
 
   return res;
@@ -48,7 +49,7 @@ export async function fetchEmbeddingsAPI(
 
   if (!res.ok) {
     const resBody = await res.json();
-    throw new APIError(res.status, resBody);
+    throw new APIError(res.status, resBody as APIErrorResponse);
   }
 
   return res;

@@ -55,7 +55,7 @@ export class Client {
     if (!res.body) {
       throw new Error("no stream body");
     }
-    return new StreamConsumer(res.body);
+    return new StreamConsumer(res.body as ReadableStream<Uint8Array>);
   }
 
   async createEmbedding(config: EmbeddingsConfig): Promise<EmbeddingsResponse> {

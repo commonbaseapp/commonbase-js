@@ -9,10 +9,11 @@
   "keywords": [
     "commonbase",
     "sdk",
-    "cms",
-    "gpt-3",
-    "gpt3",
-    "openai"
+    "proxy",
+    "gpt-4",
+    "gpt3.5-turbo",
+    "openai",
+    "load-balancer"
   ],
   "author": "Commonbase Inc.",
   "license": "MIT",
@@ -46,7 +47,7 @@
     "prettier": "^3.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2",
-    "vitest": "^0.34.6"
+    "vitest": "v1.0.0-beta.4"
   },
   "peerDependencies": {
     "openai": "^4.19.0"
