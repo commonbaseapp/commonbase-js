@@ -1,4 +1,4 @@
-name: "bun"
+name: "Env setup"
 description: "Node.js, bun & pnpm setup"
 inputs:
   node-version:
