@@ -7,13 +7,16 @@
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
+    "skipLibCheck": true,
     "noUnusedParameters": true,
     "resolveJsonModule": true,
-    "target": "es6",
-    "module": "commonjs",
+    "target": "es2020",
+    "module": "esnext",
     "declaration": true,
+    "noEmit": true,
     "outDir": "dist",
-    "strict": true
+    "strict": true,
+    "types": ["bun-types"]
   },
   "exclude": ["dist", "node_modules", "examples"]
 }
