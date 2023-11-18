@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Test
-        run: pnpm test
+        run: bun run test
       - name: Build
         run: bun run build
   release:
