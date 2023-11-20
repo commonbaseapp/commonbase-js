@@ -124,6 +124,7 @@ type AnthropicProviderConfig = {
 export type RequestConfig = {
   projectId?: string;
   userId?: string;
+  showUsage?: string;
 };
 
 export type TextCompletionConfig = RequestConfig & {
