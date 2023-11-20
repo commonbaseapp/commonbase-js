@@ -1,5 +1,5 @@
 name: "Env setup"
-description: "Node.js, bun & pnpm setup"
+description: "Node.js & bun setup"
 inputs:
   node-version:
     description: "The version of Node.js"
@@ -12,10 +12,6 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
         registry-url: "https://registry.npmjs.org"
-    - uses: pnpm/action-setup@v2
-      with:
-        version: 8
-        run_install: false
     - uses: oven-sh/setup-bun@v1
       name: Install bun
       with:
